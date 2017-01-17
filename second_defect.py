@@ -10,16 +10,24 @@ import os
 path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'
 import cv2
 import numpy as np
+import math
 
-# -> Upload Dagm image. 
-num = 2
+#Upload Dagm image. 
+num = 130
 filename = str(num)+'.PNG'   
 i = num - 1
+
+################################################################################################################
+# Las clases problematicas: 2,4, 6 (Serios problemas en el 6)
+#   En la clase 2 No esta del todo bien mirar num 140 class 2 (Problema Radica en Cuadrado que circunscribe)    #
+#
+#################################################################################################################
+
 
 ########
 #Class1#
 ########
-cl_number = 1
+cl_number = 2
 pathF = path+str(cl_number)+'_def'
 os.chdir(pathF)
 #Load labels
@@ -31,16 +39,46 @@ gt = ground_truth_dagm(lines,i)
 image = cv2.imread(filename)
 
 x1 = gt['x_position_centre'] - gt['semi_major_ax']*2
-y1 = gt['y_position_centre'] - gt['semi_minor_ax']*2
-x2 = gt['x_position_centre']+gt['semi_major_ax']*2
-y2 = gt['y_position_centre']+gt['semi_minor_ax']*2
+y1 = gt['y_position_centre'] - gt['semi_minor_ax']*3
+x2 = gt['x_position_centre'] + gt['semi_major_ax']*2
+y2 = gt['y_position_centre'] + gt['semi_minor_ax']*3
 
-cv2.rectangle(image, (x1, y1), (x2, y2), (0,255,0), 1)
+"""
+Find Limits of Ellypsoid. 
+See http://math.stackexchange.com/questions/91132/how-to-get-the-limits-of-rotated-ellipse
+"""
 
-#cv2.rectangle(image,(gt['x_position_centre'] - gt['semi_major_ax']*2,gt['y_position_centre'] - gt['semi_minor_ax']*2),(gt['x_position_centre']+gt['semi_major_ax']*2,gt['y_position_centre']+gt['semi_minor_ax']*2),(0,255,0),2)
-#cv2.rectangle(image,(gt['x_position_centre'] - gt['semi_major_ax']*2,gt['y_position_centre'] - gt['semi_minor_ax']*2),(gt['x_position_centre'] - gt['semi_major_ax']*2+40,gt['y_position_centre'] - gt['semi_minor_ax']*2+40),(0,255,0),2)
-cv2.ellipse(image,(gt['x_position_centre'],gt['y_position_centre']),(gt['semi_major_ax'],gt['semi_minor_ax']),0.37,0,360,(0,255,0),2)  
 
+cv2.ellipse(image,(gt['x_position_centre'],gt['y_position_centre']),(gt['semi_major_ax'],gt['semi_minor_ax']),gt['rotation_angle'],0,360,(0,255,0),2)  
+
+
+c1 = gt['x_position_centre']
+c2 = gt['y_position_centre']
+
+major_axis = gt['semi_major_ax']
+minus_axis =gt['semi_minor_ax']
+angle = gt['rotation_angle']
+ratation_angle_rad = np.deg2rad(angle)
+
+
+
+X = np.sqrt(major_axis**2*pow(np.cos(ratation_angle_rad),2) + minus_axis**2*pow(np.sin(ratation_angle_rad),2))
+Y = np.sqrt(major_axis**2*pow(np.sin(ratation_angle_rad),2) + minus_axis**2*pow(np.cos(ratation_angle_rad),2))
+
+x = X
+y = Y
+
+x1 = c1 - int(x)
+y1 = c2 - int(y)
+x2 = c1 + int(x)
+y2 = c2 + int(y)
+
+cv2.rectangle(image,(x1,y1),(x2,y2),(0,255,0),2)
+
+
+cv2.imshow("Image", image)
+
+cv2.destroyAllWindows()
 
 ######
 #ROIS#
@@ -68,6 +106,7 @@ c22 = A/2 + y11
 
 #Draw an Ellypse Below. 
 cv2.ellipse(image, (c11,c22), (B/2,A/2),0.37,0,360,(0,255,0),1) 
+cv2.imshow("Image", image)
 
 #Elipsoid dimentions Based on Rectangle
 ##################################################
@@ -77,12 +116,6 @@ cv2.ellipse(image, (c11,c22), (B/2,A/2),0.37,0,360,(0,255,0),1)
 cv2.rectangle(image,(gt['x_position_centre'] - gt['semi_major_ax']*2,gt['y_position_centre'] - gt['semi_minor_ax']*2),(gt['x_position_centre'] - gt['semi_major_ax']*2+gt['semi_major_ax']+60,gt['y_position_centre'] - gt['semi_minor_ax']*2+gt['semi_major_ax']),(0,255,0),2)
 
 #Ellypse Inside Rectangle. 
-
-
-#a = gt['x_position_centre'] - gt['semi_major_ax']*2
-#b = gt['y_position_centre'] - gt['semi_minor_ax']*2
-#c = gt['x_position_centre'] - gt['semi_major_ax']*2+gt['semi_major_ax']
-#d = gt['y_position_centre'] - gt['semi_minor_ax']*2+gt['semi_major_ax']
 
 cv2.imshow("Image", image)
 
@@ -94,9 +127,9 @@ cv2.destroyAllWindows()
 
 #0) Blurrear Imagen Completa
 image2blur = cv2.imread(filename)
-cv2.imshow("Imagen", image)
+#cv2.imshow("Imagen", image)
 blured = cv2.medianBlur(image2blur, 9)
-cv2.imshow("Image Blurred", blured)
+#cv2.imshow("Image Blurred", blured)
 
 
 #Coger el roi de la imagen. 
@@ -120,7 +153,7 @@ blured = masked
 #pegarlo encima
 #img2 =  blur_resized
 img2 =  blured
-cv2.imshow("Image2", img2)
+#cv2.imshow("Image2", img2)
 
 # I want to put logo on top-left corner, So I create a ROI
 rows,cols,channels = img2.shape
@@ -141,22 +174,19 @@ img2_fg = cv2.bitwise_and(img2,img2,mask = mask)
 
 # Put logo in ROI and modify the main image
 dst = cv2.add(img1_bg,img2_fg)
-cv2.imshow("dst", dst)
+#cv2.imshow("dst", dst)
 image[0:rows, 0:cols ] = dst
-#cv2.imshow('res',image)
+cv2.imshow('res',image)
 
 #cv2.waitKey(0)
 cv2.destroyAllWindows()
-
-
-
 
 def ground_truth_dagm (lines,line_number):
     line = lines[line_number].split("\t") #Change i to Numbers 
     number = int(line[0])
     semi_major_ax = int(float(line[1]))
     semi_minor_ax = int(float(line[2]))
-    rotation_angle = int(float(line[3]))
+    rotation_angle = math.degrees(float(line[3]))
     x_position_centre = int(float(line[4]))
     y_position_centre = int(float(line[5]))
     return {'number':number, 'semi_major_ax':semi_major_ax, 
