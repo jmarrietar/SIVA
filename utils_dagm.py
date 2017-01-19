@@ -8,89 +8,13 @@ import cv2
 import numpy as np
 import math
 
-def load_image_dagm(path,num_image,class_number):
-    filename = str(num_image)+'.PNG'
-    pathF = path+str(class_number)+'_def'
-    image = cv2.imread(pathF+'/'+filename)    
-    return image
-
-def load_labels_dagm(path,class_number,num):
-    i = num - 1
-    pathF = path+str(class_number)+'_def'
-    f = open(pathF+'/'+'labels.txt', 'r')
-    lines = f.readlines()
-    gt = ground_truth_dagm(lines,i)
-    return gt
-
-def write_labels_defectA(cl_number,num,gt):
-    """
-    Ahora mismo esta quemada rutas y parametros [Modificar]
-    """
-    #Write labels_defect_A dimentions [Rectangle]
-    target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'labels_defect_A.txt', 'a')
-    line = str(num)+'\t'+ str(gt['semi_major_ax'])+'\t'+ str(gt['semi_minor_ax'])+'\t'+ str(int(gt['rotation_angle']))+'\t'+ str(gt['x_position_center'])+'\t'+ str(gt['y_position_center'])
-    target.write(line)
-    target.write("\n")
-    target.close()
-    return True
-    
-def write_labels_defectB(cl_number,num,d1,d2,d3,d4):
-    #Write labels_defect_B dimentions [Rectangle]
-    target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'labels_defect_B.txt', 'a')
-    line = str(num)+'\t'+str(d1)+'\t'+str(d2)+'\t'+str(d3)+'\t'+str(d4)
-    target.write(line)
-    target.write("\n")
-    target.close()
-    return True
-
-def rectangle_expanded_roi(gt):
-    c1 = gt['x_position_center']
-    c2 = gt['y_position_center']
-    major_axis = gt['semi_major_ax']
-    minus_axis =gt['semi_minor_ax']
-    angle = gt['rotation_angle']
-    ratation_angle_rad = np.deg2rad(angle)
-    x = np.sqrt(major_axis**2*pow(np.cos(ratation_angle_rad),2) + minus_axis**2*pow(np.sin(ratation_angle_rad),2))
-    y = np.sqrt(major_axis**2*pow(np.sin(ratation_angle_rad),2) + minus_axis**2*pow(np.cos(ratation_angle_rad),2))
-    x1 = c1 - int(x)*2
-    y1 = c2 - int(y)*2
-    x2 = c1 + int(x)*2
-    y2 = c2 + int(y)*2
-    return x1, y1, x2, y2, x, y
-    
-def write_labels_expROI(cl_number,num,x1,y1,x2,y2):
-    target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'ROI.txt', 'a')
-    line = str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
-    target.write(line)
-    target.write("\n")
-    target.close()
-    return True
-
-def defect_B_rect_ROI(x1, x, y1, y2):
-    #Second defect rectangle dimentions
-    d1 = x1
-    d2 = y1
-    d3 = x1+int(x)
-    if y2 < y1+int(x)*2:
-        d4 = y2
-    else:
-        d4 = y1+int(x)*2
-    return d1, d2,  d3, d4    
-    defect_B_rect_ROI(x1, x, y1, y2)
-
-# Ellipse inside Rectangle [No rotation]
-def ellipse_inside_rect(x1,y1,x,d4):
-    x11 = x1
-    y11 = y1
-    x22 = x1 + int(x)
-    y22 = d4
-    B = x22 - x11
-    A = y22 - y11
-    c11 = B/2 + x11
-    c22 = A/2 + y11
-    return c11, c22, A, B
-
 def add_salt(image,cl_number):
+    """
+    Input: 
+    
+    Output: 
+    
+    """
     (Blue, Green, Red) = cv2.split(image)
     length = len(image)
     number_salt = 25000    
@@ -108,6 +32,12 @@ def add_salt(image,cl_number):
     return image_salted
 
 def add_blur(image2blur,cl_number): 
+    """
+    Input: 
+    
+    Output: 
+    
+    """
     #Select blur parameter acording to class number. 
     if cl_number == 1 or cl_number == 5:
         blur_parameter = 9
@@ -119,6 +49,12 @@ def add_blur(image2blur,cl_number):
     return blured
 
 def add_defect_B(c11, c22, A, B, blured, image):
+    """
+    Input: 
+    
+    Output: 
+    
+    """
     #Select ROI from image
     (cX, cY) = (blured.shape[1] // 2, blured.shape[0] // 2)
     mask = np.zeros(blured.shape[:2], dtype = "uint8")
@@ -144,10 +80,99 @@ def add_defect_B(c11, c22, A, B, blured, image):
     image[0:rows, 0:cols ] = dst
     return image
 
+def defect_B_rect_ROI(x1, x, y1, y2):
+    """
+    Input: 
+    
+    Output: 
+    
+    """
+    #Second defect rectangle dimentions
+    d1 = x1
+    d2 = y1
+    d3 = x1+int(x)
+    if y2 < y1+int(x)*2:
+        d4 = y2
+    else:
+        d4 = y1+int(x)*2
+    return d1, d2,  d3, d4    
+    defect_B_rect_ROI(x1, x, y1, y2)
+
+# Ellipse inside Rectangle [No rotation]
+def ellipse_inside_rect(x1,y1,x,d4):
+    """
+    Input: 
+    
+    Output: 
+    
+    """
+    x11 = x1
+    y11 = y1
+    x22 = x1 + int(x)
+    y22 = d4
+    B = x22 - x11
+    A = y22 - y11
+    c11 = B/2 + x11
+    c22 = A/2 + y11
+    return c11, c22, A, B
+    
+def get_labels_defectA(path,class_number,num):
+    return load_labels_dagm(path,class_number,num)
+                
+def get_labels_defectB(path,class_number,num):
+    """
+    Input: 
+    
+    Output: 
+    
+    """
+    i = num - 1
+    pathF = path+str(class_number)+'_defAB'
+    f = open(pathF+'/'+'labels_defect_B.txt', 'r')
+    lines = f.readlines()
+    gt = ground_truth_defectB(lines,i)
+    return gt
+    
+def get_roi_rect(path,class_number,num):
+    line_number = num -1 
+    pathF = path+str(class_number)+'_defAB'
+    f = open(pathF+'/'+'ROI.txt', 'r')
+    lines = f.readlines()
+    line = lines[line_number].split("\t") #Change i to Numbers 
+    number = int(line[0])
+    x1 = int(float(line[1]))
+    y1 = int(float(line[2]))
+    x2 = int(float(line[3]))
+    y2 = int(float(line[4]))
+    return {'number':number, 'x1':x1, 
+            'y1':y1, 'x2':x2, 
+            'y2':y2}
+    
+def ground_truth_defectB(lines,line_number):
+    """
+    Input: 
+    
+    Output: 
+    
+    """
+    line = lines[line_number].split("\t") #Change i to Numbers 
+    number = int(line[0])
+    x1 = int(float(line[1]))
+    y1 = int(float(line[2]))
+    x2 = int(float(line[3]))
+    y2 = int(float(line[4]))
+    return {'number':number, 'x1':x1, 
+            'y1':y1, 'x2':x2, 
+            'y2':y2}
+    
 #Function save_image_created
-
-
 def ground_truth_dagm (lines,line_number):
+    """
+    Input: 
+    
+    Output: 
+    
+    """
     line = lines[line_number].split("\t") #Change i to Numbers 
     number = int(line[0])
     semi_major_ax = int(float(line[1]))
@@ -158,3 +183,100 @@ def ground_truth_dagm (lines,line_number):
     return {'number':number, 'semi_major_ax':semi_major_ax, 
             'semi_minor_ax':semi_minor_ax, 'rotation_angle':rotation_angle, 
             'x_position_center':x_position_center, 'y_position_center':y_position_center}
+    
+def load_image_dagm(path,num_image,class_number):
+    """
+    Input: 
+    
+    Output: 
+    
+    """
+    filename = str(num_image)+'.png'
+    pathF = path+str(class_number)+'_def'
+    image = cv2.imread(pathF+'/'+filename)    
+    return image
+
+def load_labels_dagm(path,class_number,num):
+    """
+    Input: 
+    
+    Output: 
+    
+    """
+    i = num - 1
+    pathF = path+str(class_number)+'_def'
+    f = open(pathF+'/'+'labels.txt', 'r')
+    lines = f.readlines()
+    gt = ground_truth_dagm(lines,i)
+    return gt
+    
+def rectangle_expanded_roi(gt):
+    """
+    Input: 
+    
+    Output: 
+    
+    """
+    c1 = gt['x_position_center']
+    c2 = gt['y_position_center']
+    major_axis = gt['semi_major_ax']
+    minus_axis =gt['semi_minor_ax']
+    angle = gt['rotation_angle']
+    ratation_angle_rad = np.deg2rad(angle)
+    x = np.sqrt(major_axis**2*pow(np.cos(ratation_angle_rad),2) + minus_axis**2*pow(np.sin(ratation_angle_rad),2))
+    y = np.sqrt(major_axis**2*pow(np.sin(ratation_angle_rad),2) + minus_axis**2*pow(np.cos(ratation_angle_rad),2))
+    x1 = c1 - int(x)*2
+    y1 = c2 - int(y)*2
+    x2 = c1 + int(x)*2
+    y2 = c2 + int(y)*2
+    return x1, y1, x2, y2, x, y
+    
+def save_image_defect(defect,num,cl_number,image):
+    #Code Below
+    filename_with_defect = str(num) + '_'+defect+'.png'
+    cv2.imwrite('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+"_defAB/"+filename_with_defect, image)
+     
+
+def write_labels_defectA(cl_number,num,gt):
+    """
+    Input: 
+    
+    Output: 
+    Nota: ahora mismo esta quemada rutas y parametros [Modificar]
+    """
+    #Write labels_defect_A dimentions [Rectangle]
+    target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'labels_defect_A.txt', 'a')
+    line = str(num)+'\t'+ str(gt['semi_major_ax'])+'\t'+ str(gt['semi_minor_ax'])+'\t'+ str(int(gt['rotation_angle']))+'\t'+ str(gt['x_position_center'])+'\t'+ str(gt['y_position_center'])
+    target.write(line)
+    target.write("\n")
+    target.close()
+    return True
+    
+def write_labels_defectB(cl_number,num,d1,d2,d3,d4):
+    """
+    Input: 
+    
+    Output: 
+    Nota: ahora mismo esta quemada rutas y parametros [Modificar]
+    """
+    #Write labels_defect_B dimentions [Rectangle]
+    target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'labels_defect_B.txt', 'a')
+    line = str(num)+'\t'+str(d1)+'\t'+str(d2)+'\t'+str(d3)+'\t'+str(d4)
+    target.write(line)
+    target.write("\n")
+    target.close()
+    return True
+    
+def write_labels_expROI(cl_number,num,x1,y1,x2,y2):
+    """
+    Input: 
+    
+    Output: 
+    Nota: ahora mismo esta quemada rutas y parametros [Modificar]
+    """
+    target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'ROI.txt', 'a')
+    line = str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
+    target.write(line)
+    target.write("\n")
+    target.close()
+    return True
