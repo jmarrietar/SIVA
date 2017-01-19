@@ -56,7 +56,7 @@ for i in range(30,35):
     
     start_x, end_x, start_y, end_y = get_cordinates_crop(x1,x2,y1,y2,length,width)
     
-    #Week labeling (Cropping)[ROI]
+    #Week labeling (Cropping)[ROI] #Convertir esto en Funcion
     roi = image[start_x:end_x,start_y:end_y]   #Cropped de la imagen (rename to ROI)
     cv2.imshow("roi"+str(i), roi)
 
