@@ -237,7 +237,7 @@ def save_image_defect(defect,num,cl_number,image):
     cv2.imwrite('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+"_defAB/"+filename_with_defect, image)
      
 
-def write_labels_defectA(cl_number,num,gt):
+def write_labels_defectA(cl_number,num,gt,reason='',new_num='',defect=''):
     """
     Input: 
     
@@ -245,14 +245,18 @@ def write_labels_defectA(cl_number,num,gt):
     Nota: ahora mismo esta quemada rutas y parametros [Modificar]
     """
     #Write labels_defect_A dimentions [Rectangle]
-    target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'labels_defect_A.txt', 'a')
-    line = str(num)+'\t'+ str(gt['semi_major_ax'])+'\t'+ str(gt['semi_minor_ax'])+'\t'+ str(int(gt['rotation_angle']))+'\t'+ str(gt['x_position_center'])+'\t'+ str(gt['y_position_center'])
+    if reason == 'new_experiment':
+        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiments_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_'+str(defect)+'/'+'labels_defect_A.txt', 'a')
+        line = str(new_num)+'\t'+str(num)+'\t'+ str(gt['semi_major_ax'])+'\t'+ str(gt['semi_minor_ax'])+'\t'+ str(int(gt['rotation_angle']))+'\t'+ str(gt['x_position_center'])+'\t'+ str(gt['y_position_center'])
+    else:
+        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'labels_defect_A.txt', 'a')
+        line = str(num)+'\t'+ str(gt['semi_major_ax'])+'\t'+ str(gt['semi_minor_ax'])+'\t'+ str(int(gt['rotation_angle']))+'\t'+ str(gt['x_position_center'])+'\t'+ str(gt['y_position_center'])
     target.write(line)
     target.write("\n")
     target.close()
     return True
     
-def write_labels_defectB(cl_number,num,d1,d2,d3,d4):
+def write_labels_defectB(cl_number,num,x1,y1,x2,y2,reason='',new_num='',defect=''):
     """
     Input: 
     
@@ -260,22 +264,29 @@ def write_labels_defectB(cl_number,num,d1,d2,d3,d4):
     Nota: ahora mismo esta quemada rutas y parametros [Modificar]
     """
     #Write labels_defect_B dimentions [Rectangle]
-    target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'labels_defect_B.txt', 'a')
-    line = str(num)+'\t'+str(d1)+'\t'+str(d2)+'\t'+str(d3)+'\t'+str(d4)
+    if reason == 'new_experiment':
+        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiments_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_'+str(defect)+'/'+'labels_defect_B.txt', 'a')
+        line = str(new_num)+'\t'+str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
+    else:
+        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'labels_defect_B.txt', 'a')
+        line = str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
     target.write(line)
     target.write("\n")
     target.close()
     return True
     
-def write_labels_expROI(cl_number,num,x1,y1,x2,y2):
+def write_labels_expROI(cl_number,num,x1,y1,x2,y2,reason='',new_num='',defect=''):
     """
-    Input: 
-    
+    Input:
     Output: 
     Nota: ahora mismo esta quemada rutas y parametros [Modificar]
     """
-    target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'ROI.txt', 'a')
-    line = str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
+    if reason == 'new_experiment':
+        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiments_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_'+str(defect)+'/'+'ROI.txt', 'a')
+        line = str(new_num)+'\t'+str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
+    else:
+        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'ROI.txt', 'a')
+        line = str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
     target.write(line)
     target.write("\n")
     target.close()
