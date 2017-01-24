@@ -184,7 +184,7 @@ def ground_truth_dagm (lines,line_number):
             'semi_minor_ax':semi_minor_ax, 'rotation_angle':rotation_angle, 
             'x_position_center':x_position_center, 'y_position_center':y_position_center}
     
-def load_image_dagm(path,num_image,class_number):
+def load_image_dagm(path,num_image,class_number,defect = '_def'):
     """
     Input: 
     
@@ -192,7 +192,7 @@ def load_image_dagm(path,num_image,class_number):
     
     """
     filename = str(num_image)+'.png'
-    pathF = path+str(class_number)+'_def'
+    pathF = path+str(class_number)+defect
     image = cv2.imread(pathF+'/'+filename)    
     return image
 
@@ -234,7 +234,7 @@ def rectangle_expanded_roi(gt):
 def save_image_defect(defect,num,cl_number,image):
     #Code Below
     filename_with_defect = str(num) + '_'+defect+'.png'
-    cv2.imwrite('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+"_defAB/"+filename_with_defect, image)
+    cv2.imwrite('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+"_def"+defect+"/"+filename_with_defect, image)
      
 
 def write_labels_defectA(cl_number,num,gt,reason='',new_num='',defect=''):
@@ -268,7 +268,7 @@ def write_labels_defectB(cl_number,num,x1,y1,x2,y2,reason='',new_num='',defect='
         target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiments_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_'+str(defect)+'/'+'labels_defect_B.txt', 'a')
         line = str(new_num)+'\t'+str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
     else:
-        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'labels_defect_B.txt', 'a')
+        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_def'+defect+'/'+'labels_defect_B.txt', 'a')
         line = str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
     target.write(line)
     target.write("\n")
@@ -285,7 +285,7 @@ def write_labels_expROI(cl_number,num,x1,y1,x2,y2,reason='',new_num='',defect=''
         target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiments_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_'+str(defect)+'/'+'ROI.txt', 'a')
         line = str(new_num)+'\t'+str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
     else:
-        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'ROI.txt', 'a')
+        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_def'+defect+'/'+'ROI.txt', 'a')
         line = str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
     target.write(line)
     target.write("\n")

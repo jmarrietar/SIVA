@@ -18,6 +18,30 @@ from shutil import copyfile
 #######################################################################################
 
 list_defect_AB = [1,2,3,4,5,6]
+list_defect_AB.append(19)
+
+
+var = raw_input("Please enter something: ")
+print "you entered", var
+
+################################################################################################
+#   STOP HERE 1 :
+# Escoger lod numeros de las imagenes con la que trabajare en defecto, defectoAB y No defecto. 
+###############################################################################################
+
+#Funcion para agregar dinamicamente a la lista. 
+
+while(len(list_defect_AB) < 10):
+    var = raw_input("Please enter something: ")
+    print "you entered", var
+    list_defect_AB.append(var)
+
+###################################################################
+#   STOP HERE:
+#    #1) Escoger las imagenes con las que Trabajare.(Las primeras 10 con las que Trabajare!).
+#    #2) Hacer lo mismo pero con las de Defecto y las NO defecto!. 
+#
+###################################################################
 
 class_number = 1
 defect = 'AB'
@@ -40,6 +64,7 @@ for i in range (0,len(list_defect_AB)):
     write_labels_defectB(class_number,list_defect_AB[i],cord_defect_B['x1'],cord_defect_B['y1'],cord_defect_B['x2'],cord_defect_B['y2'],reason='new_experiment',new_num=contador,defect=defect)
     write_labels_expROI(class_number,list_defect_AB[i],cord_roi['x1'],cord_roi['y1'],cord_roi['x2'],cord_roi['y2'],reason='new_experiment',new_num=contador,defect=defect)
     contador+=1
+
 
 
 
