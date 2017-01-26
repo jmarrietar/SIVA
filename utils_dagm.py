@@ -12,9 +12,9 @@ from shutil import copyfile
 
 def add_salt(image,cl_number):
     """
-    Input: 
+    Input:
     
-    Output: 
+    Output:
     
     """
     (Blue, Green, Red) = cv2.split(image)
@@ -206,16 +206,19 @@ def ground_truth_defectA (lines,line_number,degrees=False):
             'semi_minor_ax':semi_minor_ax, 'rotation_angle':rotation_angle, 
             'x_position_center':x_position_center, 'y_position_center':y_position_center}
     
-def load_image_dagm(path,num_image,class_number,defect = '_def'):
+def load_image_dagm(path,num_image,class_number,defect = '_def',exp = ''):
     """
     Input: 
-    
     Output: 
-    
     """
-    filename = str(num_image)+'.png'
-    pathF = path+str(class_number)+defect
-    image = cv2.imread(pathF+'/'+filename)    
+    if exp == True:
+        pathF = path+str(class_number)+'/Cl_'+str(class_number)+'_'+defect
+        filename = 'Cl_'+str(class_number)+'_'+str(num_image)+'_'+defect+'.png'
+        image = cv2.imread(pathF+'/'+filename)
+    else:
+        filename = str(num_image)+'.png'
+        pathF = path+str(class_number)+defect
+        image = cv2.imread(pathF+'/'+filename)    
     return image
 
 def load_labels_dagm(path,class_number,num,exp=''):

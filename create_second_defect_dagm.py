@@ -3,7 +3,8 @@
 Create Second Defect on DAGM Images
 """
 #Load libraries
-import os 
+import os
+import cv2
 os.chdir('Documents/SIVA')
 
 from utils_dagm import load_image_dagm, load_labels_dagm,write_labels_defectA,rectangle_expanded_roi
@@ -23,6 +24,7 @@ for num in range (1,20):
     image = load_image_dagm(path,num,cl_number)
     gt = load_labels_dagm(path,cl_number,num)
     #cv2.ellipse(image,(gt['x_position_center'],gt['y_position_center']),(gt['semi_major_ax'],gt['semi_minor_ax']),gt['rotation_angle'],0,360,(0,255,0),2)  #Draw Ellipse [Ground Truth]
+    #cv2.imshow('image'+str(num),image)    
     write_labels_defectA(cl_number,num,gt)            #Write labels defectA [Ground Truth]
     x1, y1, x2, y2, x,y = rectangle_expanded_roi(gt)  #Dimentions of expanded rectangle 
     #cv2.rectangle(image,(x1,y1),(x2,y2),(0,255,0),2) #Draw Rectangle

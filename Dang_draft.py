@@ -45,7 +45,7 @@ for i in range(30,35):
     mask = np.zeros(image.shape[:2], dtype = "uint8")
     cv2.ellipse(mask,(gt['x_position_centre'],gt['y_position_centre']),(gt['semi_major_ax'],gt['semi_minor_ax']),0.37,0,360,255,-1)
     cv2.imshow("Mask"+str(i), mask)
-    #cv2.destroyAllWindows()  
+    #cv2.destroyAllWindows()
     
     x1 = gt['y_position_centre'] - gt['semi_minor_ax']*2
     x2 = gt['y_position_centre'] + gt['semi_minor_ax']*2
