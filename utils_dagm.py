@@ -7,6 +7,8 @@ Created on Wed Jan 18 23:55:35 2017
 import cv2
 import numpy as np
 import math
+import pickle
+from shutil import copyfile
 
 def add_salt(image,cl_number):
     """
@@ -95,8 +97,7 @@ def defect_B_rect_ROI(x1, x, y1, y2):
         d4 = y2
     else:
         d4 = y1+int(x)*2
-    return d1, d2,  d3, d4    
-    defect_B_rect_ROI(x1, x, y1, y2)
+    return d1, d2,  d3, d4
 
 # Ellipse inside Rectangle [No rotation]
 def ellipse_inside_rect(x1,y1,x,d4):
@@ -116,10 +117,20 @@ def ellipse_inside_rect(x1,y1,x,d4):
     c22 = A/2 + y11
     return c11, c22, A, B
     
-def get_labels_defectA(path,class_number,num):
-    return load_labels_dagm(path,class_number,num)
-                
-def get_labels_defectB(path,class_number,num):
+def get_labels_defectA(path,class_number,num,exp='',defect='',degrees=False):
+    i = num - 1
+    if exp == True:
+        if defect == 'A' or defect =='AB':
+            pathF = path+str(class_number)+'/'+'Cl_'+str(class_number)+'_'+defect
+            f = open(pathF+'/'+'labels_defect_A.txt', 'r')
+    else: 
+        pathF = path+str(class_number)+'_def'
+        f = open(pathF+'/'+'labels.txt', 'r')
+    lines = f.readlines()
+    gt = ground_truth_defectA(lines,i,degrees=degrees)
+    return gt
+              
+def get_labels_defectB(path,class_number,num,exp='',defect=''):
     """
     Input: 
     
@@ -127,18 +138,27 @@ def get_labels_defectB(path,class_number,num):
     
     """
     i = num - 1
-    pathF = path+str(class_number)+'_defAB'
-    f = open(pathF+'/'+'labels_defect_B.txt', 'r')
+    if exp == True:
+        if defect == 'B' or defect =='AB':
+            pathF = path+str(class_number)+'/'+'Cl_'+str(class_number)+'_'+defect
+            f = open(pathF+'/'+'labels_defect_B.txt', 'r')
+    else: 
+        pathF = path+str(class_number)+'_defAB'
+        f = open(pathF+'/'+'labels_defect_B.txt', 'r')
     lines = f.readlines()
     gt = ground_truth_defectB(lines,i)
     return gt
     
-def get_roi_rect(path,class_number,num):
+def get_roi_rect(path,class_number,num,exp='',defect=''):
     line_number = num -1 
-    pathF = path+str(class_number)+'_defAB'
-    f = open(pathF+'/'+'ROI.txt', 'r')
+    if exp == True:
+        pathF = path+str(class_number)+'/'+'Cl_'+str(class_number)+'_'+defect
+        f = open(pathF+'/'+'ROI.txt', 'r')  
+    else:
+        pathF = path+str(class_number)+'_defAB'   
+        f = open(pathF+'/'+'ROI.txt', 'r')
     lines = f.readlines()
-    line = lines[line_number].split("\t") #Change i to Numbers 
+    line = lines[line_number].split("\t") 
     number = int(line[0])
     x1 = int(float(line[1]))
     y1 = int(float(line[2]))
@@ -165,8 +185,7 @@ def ground_truth_defectB(lines,line_number):
             'y1':y1, 'x2':x2, 
             'y2':y2}
     
-#Function save_image_created
-def ground_truth_dagm (lines,line_number):
+def ground_truth_defectA (lines,line_number,degrees=False):
     """
     Input: 
     
@@ -177,7 +196,10 @@ def ground_truth_dagm (lines,line_number):
     number = int(line[0])
     semi_major_ax = int(float(line[1]))
     semi_minor_ax = int(float(line[2]))
-    rotation_angle = math.degrees(float(line[3]))
+    if degrees==True:
+        rotation_angle = int(line[3])
+    else:
+        rotation_angle = math.degrees(float(line[3]))
     x_position_center = int(float(line[4]))
     y_position_center = int(float(line[5]))
     return {'number':number, 'semi_major_ax':semi_major_ax, 
@@ -196,7 +218,7 @@ def load_image_dagm(path,num_image,class_number,defect = '_def'):
     image = cv2.imread(pathF+'/'+filename)    
     return image
 
-def load_labels_dagm(path,class_number,num):
+def load_labels_dagm(path,class_number,num,exp=''):
     """
     Input: 
     
@@ -207,8 +229,77 @@ def load_labels_dagm(path,class_number,num):
     pathF = path+str(class_number)+'_def'
     f = open(pathF+'/'+'labels.txt', 'r')
     lines = f.readlines()
-    gt = ground_truth_dagm(lines,i)
+    gt = ground_truth_defectA(lines,i)
     return gt
+    
+def load_list_selected_images(defect,class_number,number_experimet):
+    if defect == '':
+        dst = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_'+str(number_experimet)+'_DAGM/Class'+str(class_number)+'/Cl_'+str(class_number)+'_NO/'
+    elif defect == 'A':
+        dst = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_'+str(number_experimet)+'_DAGM/Class'+str(class_number)+'/Cl_'+str(class_number)+'_A/'
+    else:
+        dst = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_'+str(number_experimet)+'_DAGM/Class'+str(class_number)+'/Cl_'+str(class_number)+'_'+str(defect)+'/'
+    if defect == '':
+        list_name = 'list_no_defect.pckl'
+    elif defect == 'A':
+        list_name = 'list_defect_A.pckl'
+    elif defect == 'AB':
+        list_name = 'list_defect_AB.pckl'
+    elif defect == 'B':
+        list_name = 'list_defect_B.pckl'
+    f = open(dst+list_name, 'rb')
+    lista = pickle.load(f)
+    f.close()
+    return lista
+    
+def move_selected_images(lista,defect,class_number,number_experimet):
+    path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'
+    if defect =='':
+        src = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(class_number)+'/'
+        addon = ''
+    elif defect == 'A':
+        src = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(class_number)+'_def/'
+        addon = ''
+    else:
+        src = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(class_number)+'_def'+defect+'/'
+        addon = '_'
+    if defect == '':
+        dst = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_'+str(number_experimet)+'_DAGM/Class'+str(class_number)+'/Cl_'+str(class_number)+'_NO/'
+    else:
+        dst = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_'+str(number_experimet)+'_DAGM/Class'+str(class_number)+'/Cl_'+str(class_number)+'_'+str(defect)+'/'
+    file_type = '.png'
+    contador = 1
+    for i in range (0,len(lista)):
+        print i
+        if defect == '':
+            filename = str(lista[i])+file_type
+        elif defect == 'A':
+            filename = str(lista[i])+file_type
+        else :
+            filename = str(lista[i])+addon+defect+file_type
+        filename_dest = 'Cl_'+ str(class_number)+'_'+str(i+1)+'_'+defect+file_type
+        copyfile(src+filename, dst+filename_dest)
+        if defect == 'A': 
+            cord_defect_A = get_labels_defectA(path,class_number,int(lista[i]))
+            cord_roi = get_roi_rect(path,class_number,int(lista[i]))
+            write_labels_defectA(class_number,lista[i],cord_defect_A,reason='new_experiment',new_num=contador,defect=defect)
+            write_labels_expROI(class_number,lista[i],cord_roi['x1'],cord_roi['y1'],cord_roi['x2'],cord_roi['y2'],reason='new_experiment',new_num=contador,defect=defect)
+        elif defect == 'B':
+             cord_defect_B = get_labels_defectB(path,class_number,int(lista[i]))
+             cord_roi = get_roi_rect(path,class_number,int(lista[i]))
+             write_labels_defectB(class_number,lista[i],cord_defect_B['x1'],cord_defect_B['y1'],cord_defect_B['x2'],cord_defect_B['y2'],reason='new_experiment',new_num=contador,defect=defect)
+             write_labels_expROI(class_number,lista[i],cord_roi['x1'],cord_roi['y1'],cord_roi['x2'],cord_roi['y2'],reason='new_experiment',new_num=contador,defect=defect)
+        elif defect == 'AB': 
+            cord_defect_A = get_labels_defectA(path,class_number,int(lista[i]))
+            cord_defect_B = get_labels_defectB(path,class_number,int(lista[i]))
+            cord_roi = get_roi_rect(path,class_number,int(lista[i]))
+            write_labels_defectA(class_number,lista[i],cord_defect_A,reason='new_experiment',new_num=contador,defect=defect)
+            write_labels_defectB(class_number,lista[i],cord_defect_B['x1'],cord_defect_B['y1'],cord_defect_B['x2'],cord_defect_B['y2'],reason='new_experiment',new_num=contador,defect=defect)
+            write_labels_expROI(class_number,lista[i],cord_roi['x1'],cord_roi['y1'],cord_roi['x2'],cord_roi['y2'],reason='new_experiment',new_num=contador,defect=defect)
+        else:
+            print ('No defect')
+        contador+=1
+    return 1
     
 def rectangle_expanded_roi(gt):
     """
@@ -232,10 +323,62 @@ def rectangle_expanded_roi(gt):
     return x1, y1, x2, y2, x, y
     
 def save_image_defect(defect,num,cl_number,image):
-    #Code Below
     filename_with_defect = str(num) + '_'+defect+'.png'
     cv2.imwrite('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+"_def"+defect+"/"+filename_with_defect, image)
      
+def save_list_selected_images(lista,defect,class_number,number_experimet):
+    if defect == '':
+        dst = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_'+str(number_experimet)+'_DAGM/Class'+str(class_number)+'/Cl_'+str(class_number)+'_NO/'
+    elif defect == 'A':
+        dst = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_'+str(number_experimet)+'_DAGM/Class'+str(class_number)+'/Cl_'+str(class_number)+'_A/'
+    else:
+        dst = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_'+str(number_experimet)+'_DAGM/Class'+str(class_number)+'/Cl_'+str(class_number)+'_'+str(defect)+'/'
+    if defect == '':
+        list_name = 'list_no_defect.pckl'
+    elif defect == 'A':
+        list_name = 'list_defect_A.pckl'
+    elif defect == 'AB':
+        list_name = 'list_defect_AB.pckl'
+    elif defect == 'B':
+        list_name = 'list_defect_B.pckl'
+    f = open(dst+list_name, 'wb')
+    pickle.dump(lista, f)
+    f.close()
+    return 1
+    
+def select_images(defect,class_number):
+    """
+    Input: Defect type and class number. 
+    Output: Array with number of images to select.    
+    """
+    list_images = []
+    file_type = '.png'
+    if defect =='':
+        src = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(class_number)+'/'
+    elif defect == 'A':
+        src = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(class_number)+'_def/'
+    else:
+        src = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(class_number)+'_def'+defect+'/'
+
+    for i in range (1,151):
+        if defect =='':
+            filename = str(i)+file_type
+        elif defect == 'A':
+            filename = str(i)+defect+file_type
+        else:
+            filename = str(i)+'_'+defect+file_type
+        image = cv2.imread(src+filename) 
+        cv2.imshow('Image',image)
+        var = raw_input("Do you want to use this Image?: ")
+        if var == '1': 
+            print ('Image '+str(i)+' added')
+            list_images.append(i)
+        else:
+            print ('Image '+str(i)+' discarded ')
+        cv2.destroyAllWindows()
+        if len(list_images)>=100:
+            break
+    return list_images
 
 def write_labels_defectA(cl_number,num,gt,reason='',new_num='',defect=''):
     """
@@ -244,10 +387,13 @@ def write_labels_defectA(cl_number,num,gt,reason='',new_num='',defect=''):
     Output: 
     Nota: ahora mismo esta quemada rutas y parametros [Modificar]
     """
-    #Write labels_defect_A dimentions [Rectangle]
     if reason == 'new_experiment':
-        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiments_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_'+str(defect)+'/'+'labels_defect_A.txt', 'a')
-        line = str(new_num)+'\t'+str(num)+'\t'+ str(gt['semi_major_ax'])+'\t'+ str(gt['semi_minor_ax'])+'\t'+ str(int(gt['rotation_angle']))+'\t'+ str(gt['x_position_center'])+'\t'+ str(gt['y_position_center'])
+        if defect=='A':
+            target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_A/'+'labels_defect_A.txt', 'a')
+            line = str(new_num)+'\t'+ str(gt['semi_major_ax'])+'\t'+ str(gt['semi_minor_ax'])+'\t'+ str(int(gt['rotation_angle']))+'\t'+ str(gt['x_position_center'])+'\t'+ str(gt['y_position_center'])
+        else:
+            target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_'+str(defect)+'/'+'labels_defect_A.txt', 'a')
+            line = str(new_num)+'\t'+ str(gt['semi_major_ax'])+'\t'+ str(gt['semi_minor_ax'])+'\t'+ str(int(gt['rotation_angle']))+'\t'+ str(gt['x_position_center'])+'\t'+ str(gt['y_position_center'])
     else:
         target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_defAB/'+'labels_defect_A.txt', 'a')
         line = str(num)+'\t'+ str(gt['semi_major_ax'])+'\t'+ str(gt['semi_minor_ax'])+'\t'+ str(int(gt['rotation_angle']))+'\t'+ str(gt['x_position_center'])+'\t'+ str(gt['y_position_center'])
@@ -263,10 +409,9 @@ def write_labels_defectB(cl_number,num,x1,y1,x2,y2,reason='',new_num='',defect='
     Output: 
     Nota: ahora mismo esta quemada rutas y parametros [Modificar]
     """
-    #Write labels_defect_B dimentions [Rectangle]
     if reason == 'new_experiment':
-        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiments_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_'+str(defect)+'/'+'labels_defect_B.txt', 'a')
-        line = str(new_num)+'\t'+str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
+        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_'+str(defect)+'/'+'labels_defect_B.txt', 'a')
+        line = str(new_num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
     else:
         target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_def'+defect+'/'+'labels_defect_B.txt', 'a')
         line = str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
@@ -282,8 +427,8 @@ def write_labels_expROI(cl_number,num,x1,y1,x2,y2,reason='',new_num='',defect=''
     Nota: ahora mismo esta quemada rutas y parametros [Modificar]
     """
     if reason == 'new_experiment':
-        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiments_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_'+str(defect)+'/'+'ROI.txt', 'a')
-        line = str(new_num)+'\t'+str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
+        target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_'+str(defect)+'/'+'ROI.txt', 'a')
+        line = str(new_num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
     else:
         target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+'_def'+defect+'/'+'ROI.txt', 'a')
         line = str(num)+'\t'+str(x1)+'\t'+str(y1)+'\t'+str(x2)+'\t'+str(y2)
