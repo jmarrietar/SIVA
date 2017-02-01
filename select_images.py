@@ -7,26 +7,19 @@ Created on Thu Jan 19 17:48:22 2017
 #Load libraries
 import os 
 os.chdir('Documents/SIVA')
-
-from utils_dagm import save_list_selected_images, load_list_selected_images, move_selected_images
+from utils_dagm import save_list_selected_images, load_list_selected_images, move_selected_images,select_images
 
 #####################################
 #Select Images For Experiment dagm# #
 #####################################
-class_number = 2
+class_number = 4
 number_experimet = 1
 
-"""
+
 list_no_defect = select_images('',class_number)
 list_defect_A = select_images('A',class_number)
 list_defect_AB = select_images('AB',class_number)
 list_defect_B = select_images('B',class_number)
-"""
-
-list_no_defect = ['1','2','3','4','5','6','7','8','9']
-list_defect_A = ['9','20','21','23']
-list_defect_AB = ['31','33','34','36']
-list_defect_B = ['40','41','45','48']
 
 save_list_selected_images(list_no_defect,'',class_number,number_experimet)
 save_list_selected_images(list_defect_A,'A',class_number,number_experimet)

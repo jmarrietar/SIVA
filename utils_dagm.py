@@ -367,7 +367,7 @@ def select_images(defect,class_number):
         if defect =='':
             filename = str(i)+file_type
         elif defect == 'A':
-            filename = str(i)+defect+file_type
+            filename = str(i)+file_type
         else:
             filename = str(i)+'_'+defect+file_type
         image = cv2.imread(src+filename) 
