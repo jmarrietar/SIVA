@@ -12,11 +12,15 @@ from shutil import copyfile
 
 def add_salt(image,cl_number):
     """
-    Input:
-    
+    Add salt to an Image.
+        
+    Input data:
+        image = image to add salt.
+        cl_number = class number of image.
     Output:
-    
+        Image with salt.
     """
+    
     (Blue, Green, Red) = cv2.split(image)
     length = len(image)
     number_salt = 25000    
@@ -35,11 +39,16 @@ def add_salt(image,cl_number):
 
 def add_blur(image2blur,cl_number): 
     """
-    Input: 
-    
-    Output: 
-    
+    Blur and Image
+        
+    Input data:
+        image2blur = image to be blured.
+        cl_number = class number of image.
+        
+    Output:
+        Image blurred.
     """
+    
     #Select blur parameter acording to class number. 
     if cl_number == 1 or cl_number == 5:
         blur_parameter = 9
@@ -52,9 +61,15 @@ def add_blur(image2blur,cl_number):
 
 def add_defect_B(c11, c22, A, B, blured, image):
     """
-    Input: 
+    Add defect type B(Blured) to image
+    
+    Input:
+        c11, c22, A, B: cordinates where defect should be placed
+        blured: image blured.
+        image : image to add defect.
     
     Output: 
+        image = image with defect B
     
     """
     #Select ROI from image
@@ -84,10 +99,13 @@ def add_defect_B(c11, c22, A, B, blured, image):
 
 def defect_B_rect_ROI(x1, x, y1, y2):
     """
+    Roi rectangle delimitation creation for defect B.
+    
     Input: 
+        x1, x, y1, y2 : Big Roi coordinates on delimitation for both defects.
     
-    Output: 
-    
+    Output:
+        d1, d2,  d3, d4 : Coordinates for little Roi Delimitation on defect B.
     """
     #Second defect rectangle dimentions
     d1 = x1
@@ -102,9 +120,13 @@ def defect_B_rect_ROI(x1, x, y1, y2):
 # Ellipse inside Rectangle [No rotation]
 def ellipse_inside_rect(x1,y1,x,d4):
     """
+    Return Coordinates of Ellipse inside given rectangle.
+    
     Input: 
+        x1,y1,x,d4 : Rectangle Coordinates
     
     Output: 
+        c11, c22, A, B : Ellipse Coordinates (No rotation)
     
     """
     x11 = x1
@@ -118,6 +140,20 @@ def ellipse_inside_rect(x1,y1,x,d4):
     return c11, c22, A, B
     
 def get_labels_defectA(path,class_number,num,exp='',defect='',degrees=False):
+    """
+    Input:
+        path = Path where labels are located.
+        class_number = class number
+        num = number of image
+        exp = check if is for an experiment or not.
+        defect = Type of defect.
+        degrees = check if necessary to convert to degrees.
+    
+    Output:
+        gt : Dictionary with ground truth for defect A.
+        
+    Note: Paths are fixed.(Fix)
+    """
     i = num - 1
     if exp == True:
         if defect == 'A' or defect =='AB':
@@ -132,10 +168,18 @@ def get_labels_defectA(path,class_number,num,exp='',defect='',degrees=False):
               
 def get_labels_defectB(path,class_number,num,exp='',defect=''):
     """
-    Input: 
+    Input:
+        path = Path where labels are located.
+        class_number = class number
+        num = number of image
+        exp = check if is for an experiment or not.
+        defect = Type of defect.
+        degrees = check if degrees already on.
     
-    Output: 
-    
+    Output:
+        gt =  Dictionary with ground truth for defect B.
+        
+    Note: Paths are fixed.(Fix)
     """
     i = num - 1
     if exp == True:
@@ -150,6 +194,20 @@ def get_labels_defectB(path,class_number,num,exp='',defect=''):
     return gt
     
 def get_roi_rect(path,class_number,num,exp='',defect=''):
+    """
+    Get Roi Coordinates of defects
+    
+    Input:
+        path = Path where labels are located.
+        class_number = class number
+        num = number of image
+        exp = check if is for an experiment or not.
+        defect = Type of defect.
+        
+        Output:
+        
+        Note: Paths are fixed.(Fix)
+    """
     line_number = num -1 
     if exp == True:
         pathF = path+str(class_number)+'/'+'Cl_'+str(class_number)+'_'+defect
@@ -170,10 +228,13 @@ def get_roi_rect(path,class_number,num,exp='',defect=''):
     
 def ground_truth_defectB(lines,line_number):
     """
-    Input: 
+    Input:
+        lines = All lines on file .txt
+        line_number = specific line on lines to read.
+    Output:
+        dictionary with labels
     
-    Output: 
-    
+    Note: Paths are fixed.(Fix)
     """
     line = lines[line_number].split("\t") #Change i to Numbers 
     number = int(line[0])
@@ -188,8 +249,12 @@ def ground_truth_defectB(lines,line_number):
 def ground_truth_defectA (lines,line_number,degrees=False):
     """
     Input: 
+        lines = All lines on file .txt
+        line_number = specific line on lines to read.
+        degrees = check if degrees already on.
     
-    Output: 
+    Output:
+        dictionary with labels
     
     """
     line = lines[line_number].split("\t") #Change i to Numbers 
@@ -209,7 +274,14 @@ def ground_truth_defectA (lines,line_number,degrees=False):
 def load_image_dagm(path,num_image,class_number,defect = '_def',exp = ''):
     """
     Input: 
+        path = Path where images located.
+        num_image = number of image
+        class_number = class number
+        defect = defect type
+        exp = if it is for experiment
+    
     Output: 
+        image = Returned image
     """
     if exp == True:
         pathF = path+str(class_number)+'/Cl_'+str(class_number)+'_'+defect
@@ -223,10 +295,9 @@ def load_image_dagm(path,num_image,class_number,defect = '_def',exp = ''):
 
 def load_labels_dagm(path,class_number,num,exp=''):
     """
-    Input: 
+    Alternative function to load labels A.
     
-    Output: 
-    
+    see get_labels_defectA
     """
     i = num - 1
     pathF = path+str(class_number)+'_def'
@@ -236,6 +307,16 @@ def load_labels_dagm(path,class_number,num,exp=''):
     return gt
     
 def load_list_selected_images(defect,class_number,number_experimet):
+    """
+    Input:
+        defect = defect type
+        class_number = Class number
+        number_experimet = Number of experiment
+        
+    Output:
+        lista: Lista of selected images
+    
+    """
     if defect == '':
         dst = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_'+str(number_experimet)+'_DAGM/Class'+str(class_number)+'/Cl_'+str(class_number)+'_NO/'
     elif defect == 'A':
@@ -256,6 +337,18 @@ def load_list_selected_images(defect,class_number,number_experimet):
     return lista
     
 def move_selected_images(lista,defect,class_number,number_experimet):
+    """
+    Input:
+        lista = Lista of selected images
+        defect = Type of defect.
+        class_number = Class number
+        number_experimet = Number of experiment
+    
+    Output:
+        return 1 when finish.
+    
+    Note: Paths are fixed.(Fix)
+    """
     path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'
     if defect =='':
         src = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(class_number)+'/'
@@ -306,9 +399,13 @@ def move_selected_images(lista,defect,class_number,number_experimet):
     
 def rectangle_expanded_roi(gt):
     """
+    Create a rectangle ROI based on ellypse coordinates.
+        
     Input: 
+        gt: Ground truth of Ellipse Coordinates.
     
     Output: 
+        x1, y1, x2, y2, x, y Coordinates of ROI
     
     """
     c1 = gt['x_position_center']
@@ -326,10 +423,26 @@ def rectangle_expanded_roi(gt):
     return x1, y1, x2, y2, x, y
     
 def save_image_defect(defect,num,cl_number,image):
+    """
+    Save Image with defect.
+    
+    Input:
+        defect = Type of defect
+        num = number of image
+        cl_number = Class number
+        image = image to be saved.
+        
+    Note: Paths are fixed.(Fix)
+    """
     filename_with_defect = str(num) + '_'+defect+'.png'
     cv2.imwrite('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/optical2/Class'+str(cl_number)+"_def"+defect+"/"+filename_with_defect, image)
      
 def save_list_selected_images(lista,defect,class_number,number_experimet):
+    """
+    Save lista for defect type.
+        
+    Note: Paths are fixed.(Fix)
+    """
     if defect == '':
         dst = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_'+str(number_experimet)+'_DAGM/Class'+str(class_number)+'/Cl_'+str(class_number)+'_NO/'
     elif defect == 'A':
@@ -351,8 +464,13 @@ def save_list_selected_images(lista,defect,class_number,number_experimet):
     
 def select_images(defect,class_number):
     """
-    Input: Defect type and class number. 
-    Output: Array with number of images to select.    
+    Load images from class number to user select witch ones to use in the experiments.
+    
+    Input: 
+        defect = Defect type
+        class_number = class number.
+    Output: 
+        list_images = Array with number of images to select.
     """
     list_images = []
     file_type = '.png'
@@ -385,10 +503,18 @@ def select_images(defect,class_number):
 
 def write_labels_defectA(cl_number,num,gt,reason='',new_num='',defect=''):
     """
-    Input: 
+    Input:
+        cl_number = Class number
+        num = Number of Image
+        gt = Ground truth Labels A
+        reason= if is for experiment
+        new_num = new number of Image
+        defect = Defect Type.
     
     Output: 
-    Nota: ahora mismo esta quemada rutas y parametros [Modificar]
+        Return true
+    
+    Note: Paths are fixed.(Fix)
     """
     if reason == 'new_experiment':
         if defect=='A':
@@ -407,10 +533,18 @@ def write_labels_defectA(cl_number,num,gt,reason='',new_num='',defect=''):
     
 def write_labels_defectB(cl_number,num,x1,y1,x2,y2,reason='',new_num='',defect=''):
     """
-    Input: 
+    Input:
+        cl_number = Class number
+        num = Number of Image
+        x1,y1,x2,y2 = Coordinates defect B Roi
+        reason = if it is for experiment
+        new_num = new number of Image
+        defect = defect Type
     
     Output: 
-    Nota: ahora mismo esta quemada rutas y parametros [Modificar]
+        Return true
+    
+    Note: Paths are fixed.(Fix)
     """
     if reason == 'new_experiment':
         target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_'+str(defect)+'/'+'labels_defect_B.txt', 'a')
@@ -426,8 +560,17 @@ def write_labels_defectB(cl_number,num,x1,y1,x2,y2,reason='',new_num='',defect='
 def write_labels_expROI(cl_number,num,x1,y1,x2,y2,reason='',new_num='',defect=''):
     """
     Input:
+        cl_number = Class number
+        num = Number of Image
+        x1,y1,x2,y2 = Coordinates of ROI
+        reason= if it is for experiment
+        new_num= new number of Image
+        defect= defect Type
+    
     Output: 
-    Nota: ahora mismo esta quemada rutas y parametros [Modificar]
+        Return true
+    
+    Note: Paths are fixed.(Fix)
     """
     if reason == 'new_experiment':
         target = open('/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'+str(cl_number)+'/Cl_'+str(cl_number)+'_'+str(defect)+'/'+'ROI.txt', 'a')
