@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Create Second Defect on DAGM Images
+
+@author: josemiguelarrieta
 """
 #Load libraries
 import os

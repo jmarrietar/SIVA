@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jan 19 17:48:22 2017
+Select Images For Experimentaton (DAGM Images)
 
 @author: josemiguelarrieta
 """

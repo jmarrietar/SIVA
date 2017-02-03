@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jan 18 23:55:35 2017
+Utilities for DAGM  images experimentation. 
 
 @author: josemiguelarrieta
 """
