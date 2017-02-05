@@ -14,6 +14,10 @@ from balu.ImageProcessing import Bim_segbalu
 from Bfx_basicint import Bfx_basicint
 from skimage.feature import hog
 import matplotlib.pyplot as plt
+import numpy as np
+from mahotas.features import surf
+from pylab import *
+
 
 #Load Image
 filename = 'Cl_1_2_AB.png'
@@ -46,25 +50,14 @@ hog = hog(gray_image, orientations=8, pixels_per_cell=(8, 8),
 
                     
 #SURF
-# Create SURF object. Hessian Threshold to 400
-surf = cv2.SURF(400)
-surf.upright = True
-surf.extended = False
-
-# Find keypoints and descriptors directly
-kp, des = surf.detectAndCompute(gray_image,None)
-
-print len(kp)
-
-# Find size of descriptor
-print surf.descriptorSize()
-
-img2 = cv2.drawKeypoints(gray_image,kp,None,(255,0,0),4)
-
-plt.imshow(img2),plt.show()
-
-
-
+colors = np.array([(0,255,0)])
+l, w = gray_image.shape
+a = np.array([l/2,w/2,14,54,1])
+a = a.reshape(1,len(a))
+sp2 = surf.descriptors(gray_image, a, is_integral=False, descriptor_only=False)
+f2 = surf.show_surf(gray_image, sp2,colors = colors)
+imshow(f2)
+show()
 
 
 
