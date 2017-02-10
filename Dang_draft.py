@@ -1,14 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Dec 18 12:36:52 2016
-
 @author: josemiguelarrieta
 """
-
-##########################################################
-#NOTE0:    Hacerlo en Sublime Text esta parte del Header #
-##########################################################
-
                                 #------------------------#
                                 #-- Image Manipulation --#
                                 #------------------------#
@@ -19,63 +12,44 @@ import cv2
 import numpy as np
 from utils_dagm import load_image_dagm, get_roi_rect, get_labels_defectA, get_labels_defectB
 from skimage.feature import hog
-from skimage.feature import hog
 from skimage import color
 from localbinarypatterns import LocalBinaryPatterns
 
 #Image Information [1 Image Only]
 class_number = 1
 number_experimet = 1
-num = 1
-path= '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'
+num = 14
+path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'
 
-cropped,cropped_mask = WeakLabeling(path,num,class_number,defect = 'A',exp = True)
-#IMPORTANT: 
-#Nota WeekLabeling Le falta Opcion para AB!
+#WeakLabeling defect A
+#cropped,cropped_mask = WeakLabeling(path,num,class_number,defect = 'A',exp = True)
+
+#WeakLabeling defect AB [MULTILABEL]
+cropped,cropped_maskA,cropped_maskB = WeakLabeling(path,num,class_number,defect = 'AB',exp = True)
 
 cv2.imshow("cropped", cropped)
-cv2.imshow("cropped_mask", cropped_mask)
+cv2.imshow("cropped_maskA", cropped_maskA)
+cv2.imshow("cropped_maskB", cropped_maskB)
 cv2.destroyAllWindows()
 
-##############################################################               
-
+###############################################################
 #SISL [1 imagen]
 labels,instances = get_data_SISL(cropped,cropped_mask)
-
     
-
 ###############################################################               
 #MISL[1 imagen]
 label_bag, bag = get_data_MISL(cropped,cropped_mask)
 
-        ############################
-        #MULTIPLE INSTANCE LEARNING# 
-        ############################
-#Crear un array que guarde los IDS de las instancias.
-        
-#Aqui crear un array con el id de la Bolsa. 
-###############################################################
-                ######                
-                #SIML#
-                ######
+###############################################################               
+#SIML[1 imagen]
+insta_labels, instances = get_data_SIML(cropped,cropped_maskA,cropped_maskB)
 
-#DEMASIADO IMPORTANTE: Aqui en ML, HACER 2 MASK PORQUE TIENE 2 DEFECTOS. 
- #SIML [Hacer en otro archivo/ Necesitas las 2 labels (2 gt A Y B defect)]
+###############################################################        
+#MIML[1 imagen]
+labels_bag, bag = get_data_MIML(cropped,cropped_maskA,cropped_maskB)
 
 
-#nota
-
-################################################################
-
-###############################################################
-                ######                
-                #MIML#
-                ######
-
-#DEMASIADO IMPORTANTE: Combinar MI y ML!!!!!!. 
- #MIML [Hacer en otro archivo/ Necesitas las 2 labels (2 gt A Y B defect)]
-
-################################################################
+#Functions
 
 def get_data_SISL(cropped,cropped_mask):
     """
@@ -108,7 +82,58 @@ def get_data_SISL(cropped,cropped_mask):
         instances = np.append(instances,instance,axis=0)
     return insta_labels, instances
     
+    
+def get_data_SIML(cropped,cropped_maskA,cropped_maskB):
+    """
+    
+    Labeling & Feature Extracion
+    
+    Problem = Necesito meterle defect = A,B,AB.. Pero Funcion defect tmb se llama Igual!
+    
+    """
+    instances =  np.empty((0,58), float)    #Cambiar 58 por numero de Features
+    insta_labelsA = np.empty((0,1), int)
+    insta_labelsB = np.empty((0,1), int)
+    (winW, winH) = (32, 32)                 #Descomposición en imágenes de 32 a 32 con corrimiento de a 32?. 
+    for (x, y, window_maskA,window) in sliding_window(cropped_maskA,cropped, stepSize=32, windowSize=(winW, winH)):
+        #if the window does not meet our desired window size, ignore it
+        if window_maskA.shape[0] != winH or window_maskA.shape[1] != winW:
+            continue
+        #Label defectA
+        if (defect(winW,winH,window_maskA)==True):
+            insta_labelsA = np.append(insta_labelsA,np.array([[1]]), axis = 0)
+        else:
+            insta_labelsA = np.append(insta_labelsA,np.array([[0]]), axis = 0)
+    for (x, y, window_maskB,window) in sliding_window(cropped_maskB,cropped, stepSize=32, windowSize=(winW, winH)):
+        #if the window does not meet our desired window size, ignore it
+        if window_maskB.shape[0] != winH or window_maskB.shape[1] != winW:
+            continue     
+        #Label defectB
+        if (defect(winW,winH,window_maskB)==True):
+            insta_labelsB = np.append(insta_labelsB,np.array([[1]]), axis = 0)
+        else:
+            insta_labelsB = np.append(insta_labelsB,np.array([[0]]), axis = 0)
+
+        #Extract Features        
+        window_gray = color.rgb2gray(window)
+        #HOG [Fix Dimentionality]
+        fd, _ = hog(window_gray, orientations=8, pixels_per_cell=(16, 16),
+                            cells_per_block=(1, 1), visualise=True, feature_vector = True)
+        #LBP Features
+        desc = LocalBinaryPatterns(24, 8)
+        hist = desc.describe(window_gray)
+        #Join Features
+        instance = np.concatenate((fd, hist), axis=0)
+        instance.resize(1,len(instance))
+        instances = np.append(instances,instance,axis=0)
+    insta_labels = np.concatenate((insta_labelsA,insta_labelsB),axis=1)        
+    return insta_labels, instances
+    
+    
 def get_data_MISL(cropped,cropped_mask):
+    """
+    
+    """
     labels,bag = get_data_SISL(cropped,cropped_mask)
     if 1 in labels:
         label_bag = 1
@@ -116,11 +141,34 @@ def get_data_MISL(cropped,cropped_mask):
         label_bag = 0
     return label_bag, bag
 
+
+def get_data_MIML(cropped,cropped_maskA,cropped_maskB):
+    """
+    
+    """
+    insta_labels, instances = get_data_SIML(cropped,cropped_maskA,cropped_maskB)
+    insta_labelsA = insta_labels[:,[0]]
+    insta_labelsB = insta_labels[:,[1]]
+    bag = instances
+    
+    if 1 in insta_labelsA:
+        labelA = 1
+    else:
+        labelA = 0
+    if 1 in insta_labelsB:
+        labelB = 1
+    else:
+        labelB = 0
+    label_bag = np.array([[labelA,labelB]])
+    return label_bag, bag
+
+
 def defect(X,Y,window_mask): 
     if (float(np.count_nonzero(window_mask))/(X*Y)>0.10):
         return True
     else:
         return False
+
 
 def get_cordinates_crop(x1,x2,y1,y2,length,width):    
     if (x1 < 0):
@@ -149,6 +197,7 @@ def get_cordinates_crop(x1,x2,y1,y2,length,width):
         end_y = y2        
     return start_x, end_x, start_y, end_y
 
+
 def sliding_window(image, image2 ,stepSize, windowSize):
 	# slide a window across the image
 	for y in xrange(0, image2.shape[0], stepSize):
@@ -156,9 +205,11 @@ def sliding_window(image, image2 ,stepSize, windowSize):
 			# yield the current window
 			yield (x, y, image[y:y + windowSize[1], x:x + windowSize[0]],image2[y:y + windowSize[1], x:x + windowSize[0]])
 
+
 def WeakLabeling(path,num,class_number,defect = 'X',exp = True):
     """
     Importante: Falta Implementar para Defect AB!
+    
     """
     image = load_image_dagm(path,num,class_number,defect = defect,exp = True)
     length, width,_ = image.shape
@@ -176,6 +227,19 @@ def WeakLabeling(path,num,class_number,defect = 'X',exp = True):
         dfB_B = get_labels_defectB(path,class_number,num,exp=True,defect='B')
         #Draw Defect on Mask
         cv2.rectangle(mask,(dfB_B['x1'],dfB_B['y1']),(dfB_B['x2'],dfB_B['y2']),255,-1)
+    elif defect =='AB':
+        dfAB_A = get_labels_defectA(path,class_number,num,exp=True,defect='AB',degrees=True)
+        dfAB_B = get_labels_defectB(path,class_number,num,exp=True,defect='AB')
+        maskA = np.zeros(image.shape[:2], dtype = "uint8")
+        cv2.ellipse(maskA,(dfAB_A['x_position_center'],dfAB_A['y_position_center']),(dfAB_A['semi_major_ax'],dfAB_A['semi_minor_ax']),dfAB_A['rotation_angle'],0,360,255,-1)
+        maskB = np.zeros(image.shape[:2], dtype = "uint8")
+        cv2.rectangle(maskB,(dfAB_B['x1'],dfAB_B['y1']),(dfAB_B['x2'],dfAB_B['y2']),255,-1)
+        #Week labeling [Cropping-ROI]        
+        start_x, end_x, start_y, end_y = get_cordinates_crop(roi_labels['x1'],roi_labels['x2'],roi_labels['y1'],roi_labels['y2'],length,width)
+        roi = image[start_y:end_y,start_x:end_x]      
+        roi_maskA = maskA[start_y:end_y,start_x:end_x]
+        roi_maskB = maskB[start_y:end_y,start_x:end_x]
+        return roi,roi_maskA,roi_maskB
     else:
         return 0,0
     #Week labeling [Cropping-ROI]
@@ -183,17 +247,3 @@ def WeakLabeling(path,num,class_number,defect = 'X',exp = True):
     roi = image[start_y:end_y,start_x:end_x]      
     roi_mask = mask[start_y:end_y,start_x:end_x]
     return roi,roi_mask
-
-"""
-def ground_truth_dagm (lines,line_number):
-    line = lines[line_number].split("\t") #Change i to Numbers 
-    number = int(line[0])
-    semi_major_ax = int(float(line[1]))
-    semi_minor_ax = int(float(line[2]))
-    rotation_angle = int(float(line[3]))
-    x_position_centre = int(float(line[4]))
-    y_position_centre = int(float(line[5]))
-    return {'number':number, 'semi_major_ax':semi_major_ax, 
-            'semi_minor_ax':semi_minor_ax, 'rotation_angle':rotation_angle, 
-            'x_position_centre':x_position_centre, 'y_position_centre':y_position_centre}
-"""

@@ -60,4 +60,5 @@ cv2.rectangle(image3,(dfAB_B['x1'],dfAB_B['y1']),(dfAB_B['x2'],dfAB_B['y2']),(0,
 cv2.ellipse(image3,(dfAB_A['x_position_center'],dfAB_A['y_position_center']),(dfAB_A['semi_major_ax'],dfAB_A['semi_minor_ax']),dfAB_A['rotation_angle'],0,360,(0,255,0),2)  #Draw Ellipse [Ground Truth]
 cv2.imshow('image3'+str(num),image3)
 
+
 cv2.destroyAllWindows() 
