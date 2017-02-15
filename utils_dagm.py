@@ -154,6 +154,17 @@ def ellipse_inside_rect(x1,y1,x,d4):
     c22 = A/2 + y11
     return c11, c22, A, B
     
+def extract_features (image):
+    window_gray = color.rgb2gray(image)     
+    #HOG [Fix Dimentionality]
+    fd, _ = hog(window_gray, orientations=8, pixels_per_cell=(16, 16),
+                cells_per_block=(1, 1), visualise=True, feature_vector = True)
+    #LBP Features
+    desc = LocalBinaryPatterns(24, 8)
+    hist = desc.describe(window_gray)        
+    features = np.concatenate((fd, hist), axis=0)
+    return features
+    
 def get_coordinates_crop(x1,x2,y1,y2,length,width): 
     """
     Get coordinates to crop ROI in image, useful when ROI es greater than
@@ -192,40 +203,65 @@ def get_coordinates_crop(x1,x2,y1,y2,length,width):
         end_y = y2        
     return start_x, end_x, start_y, end_y
     
-def get_data_SISL(cropped,cropped_mask):
-    """
-    Funciona para defectA y defectB, pero No esta Generalizado para defectAB. 
+def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
+    """ 
+    Labeling & Feature Extracion     
+    
     Input:
-    
+        cropped = Cropped Section of Image. 
+        cropped_maskA = Cropped Mask For Defect.
+        cropped_maskB = Cropped Mask For Defect 2 (default:None).
     Output: 
-
-    Labeling & Feature Extracion
+        If defect is AB return generalization of defect and respective defects as one. 
+        Otherwise if defect is A or B(One Defect) return instances and labels accordingly. 
     
+    TO DO: Change number of Feature from 58 to X
     """
-    instances =  np.empty((0,58), float)    #Cambiar 58 por numero de Features
-    insta_labels = np.empty((0,1), int)
     (winW, winH) = (32, 32)                 #Descomposición en imágenes de 32 a 32 con corrimiento de a 32?. 
-    for (x, y, window_mask,window) in sliding_window(cropped_mask,cropped, stepSize=32, windowSize=(winW, winH)):
+    labels = np.empty((0,1), int)
+    instances =  np.empty((0,58), float)    #Cambiar 58 por numero de Features
+    insta_labelsA = np.empty((0,1), int)
+    
+    #Check If image contains DefectA
+    if cropped_maskA is None:
+        cropped_maskA = np.zeros(cropped.shape[:2], dtype = "uint8")
+            
+    #Check If image contains DefectB
+    if cropped_maskB is not None:
+        insta_labelsB = np.empty((0,1), int)
+        for (x, y, window_maskB,window) in sliding_window(cropped_maskB,cropped, stepSize=32, windowSize=(winW, winH)):
+            #if the window does not meet our desired window size, ignore it
+            if window_maskB.shape[0] != winH or window_maskB.shape[1] != winW:
+                continue
+            #Label defectB
+            if (defect(winW,winH,window_maskB)==True):
+                insta_labelsB = np.append(insta_labelsB,np.array([[1]]), axis = 0)
+            else:
+                insta_labelsB = np.append(insta_labelsB,np.array([[0]]), axis = 0)
+                
+    for (x, y, window_mask,window) in sliding_window(cropped_maskA,cropped, stepSize=32, windowSize=(winW, winH)):
         #if the window does not meet our desired window size, ignore it
         if window_mask.shape[0] != winH or window_mask.shape[1] != winW:
             continue
         if (defect(winW,winH,window_mask)==True):
-            insta_labels = np.append(insta_labels,np.array([[1]]), axis = 0)
+            insta_labelsA = np.append(insta_labelsA,np.array([[1]]), axis = 0)
         else:
-            insta_labels = np.append(insta_labels,np.array([[0]]), axis = 0)
-        window_gray = color.rgb2gray(window)
-        
-        #HOG [Fix Dimentionality]
-        fd, _ = hog(window_gray, orientations=8, pixels_per_cell=(16, 16),
-                            cells_per_block=(1, 1), visualise=True, feature_vector = True)
-        #LBP Features
-        desc = LocalBinaryPatterns(24, 8)
-        hist = desc.describe(window_gray)
-        
-        instance = np.concatenate((fd, hist), axis=0)
+            insta_labelsA = np.append(insta_labelsA,np.array([[0]]), axis = 0)
+        #Extract Features
+        instance = extract_features(window) 
         instance.resize(1,len(instance))
         instances = np.append(instances,instance,axis=0)
-    return insta_labels, instances
+        
+    #If cropped_maskB & cropped_maskA exist then defect is AB[Generalization]
+    if cropped_maskB is not None:
+        for i in range(0,len(insta_labelsB)):
+            if (insta_labelsA[i][0]==1 or insta_labelsB[i][0]==1):
+                labels = np.append(labels,np.array([[1]]), axis = 0)
+            else:
+                labels = np.append(labels,np.array([[0]]), axis = 0)
+        return labels,instances
+    else:
+        return insta_labelsA, instances
 
 def get_data_SIML(cropped,cropped_maskA,cropped_maskB):
     """
@@ -261,35 +297,43 @@ def get_data_SIML(cropped,cropped_maskA,cropped_maskB):
             insta_labelsB = np.append(insta_labelsB,np.array([[1]]), axis = 0)
         else:
             insta_labelsB = np.append(insta_labelsB,np.array([[0]]), axis = 0)
-
         #Extract Features        
-        window_gray = color.rgb2gray(window)
-        #HOG [Fix Dimentionality]
-        fd, _ = hog(window_gray, orientations=8, pixels_per_cell=(16, 16),
-                            cells_per_block=(1, 1), visualise=True, feature_vector = True)
-        #LBP Features
-        desc = LocalBinaryPatterns(24, 8)
-        hist = desc.describe(window_gray)
-        #Join Features
-        instance = np.concatenate((fd, hist), axis=0)
+        instance = extract_features(window)
         instance.resize(1,len(instance))
         instances = np.append(instances,instance,axis=0)
     insta_labels = np.concatenate((insta_labelsA,insta_labelsB),axis=1)        
     return insta_labels, instances
 
-def get_data_MISL(cropped,cropped_mask):
+def get_data_MISL(cropped,cropped_maskA = None,cropped_maskB = None):
     """        
-    Input:
+    Labeling & Feature Extracion     
     
+    Input:
+        cropped = Cropped Section of Image. 
+        cropped_maskA = Cropped Mask For Defect.
+        cropped_maskB = Cropped Mask For Defect 2 (default:None).
     Output: 
+        If defect is AB return generalization of defect and respective defects as one. 
+        Otherwise if defect is A or B(One Defect) return instances and labels accordingly.
     
     """
-    labels,bag = get_data_SISL(cropped,cropped_mask)
-    if 1 in labels:
-        label_bag = 1
-    else:
-        label_bag = 0
-    return label_bag, bag
+    if cropped_maskA is not None and cropped_maskB is not None: #Two Defect
+        labels,bag = get_data_SISL(cropped,cropped_maskA,cropped_maskB)
+        if 1 in labels:
+            label_bag = 1
+        else:
+            label_bag = 0
+        return label_bag, bag
+    elif cropped_maskA is not None:   #One Defect
+        labels,bag = get_data_SISL(cropped,cropped_maskA)
+        if 1 in labels:
+            label_bag = 1
+        else:
+            label_bag = 0
+        return label_bag, bag
+    elif cropped_maskA is None and cropped_maskB is None:  #No Defect
+        labels,bag = get_data_SISL(cropped)
+        return 0, bag
 
 def get_data_MIML(cropped,cropped_maskA,cropped_maskB):
     """
