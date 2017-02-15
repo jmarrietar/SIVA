@@ -181,20 +181,20 @@ def get_coordinates_crop(x1,x2,y1,y2,length,width):
     if (y1 < 0):
         start_y = 0
     elif (y1 > length):
-        y1 = length
+        start_y = length
     else:
         start_y = y1
     if (y2 < 0):
         end_y = 0
     elif (y2 > width):   
-       y2 = width
+        end_y = width
     else:
         end_y = y2        
     return start_x, end_x, start_y, end_y
     
 def get_data_SISL(cropped,cropped_mask):
     """
-    
+    Funciona para defectA y defectB, pero No esta Generalizado para defectAB. 
     Input:
     
     Output: 
