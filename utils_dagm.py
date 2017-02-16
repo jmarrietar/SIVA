@@ -210,7 +210,7 @@ def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
     Input:
         cropped = Cropped Section of Image. 
         cropped_maskA = Cropped Mask For Defect.
-        cropped_maskB = Cropped Mask For Defect 2 (default:None).
+        cropped_maskB = Cropped Mask For Defect 2.
     Output: 
         If defect is AB return generalization of defect and respective defects as one. 
         Otherwise if defect is A or B(One Defect) return instances and labels accordingly. 
@@ -221,8 +221,12 @@ def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
     labels = np.empty((0,1), int)
     instances =  np.empty((0,58), float)    #Cambiar 58 por numero de Features
     insta_labelsA = np.empty((0,1), int)
-    
-    #Check If image contains DefectA
+    insta_labelsB = np.empty((0,1), int)
+            
+    #Check If image contains DefectB
+    if cropped_maskB is None:
+        cropped_maskB = np.zeros(cropped.shape[:2], dtype = "uint8")
+        
     if cropped_maskA is None:
         cropped_maskA = np.zeros(cropped.shape[:2], dtype = "uint8")
             
@@ -253,7 +257,7 @@ def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
         instances = np.append(instances,instance,axis=0)
         
     #If cropped_maskB & cropped_maskA exist then defect is AB[Generalization]
-    if cropped_maskB is not None:
+    if cropped_maskA is not None and cropped_maskB is not None:
         for i in range(0,len(insta_labelsB)):
             if (insta_labelsA[i][0]==1 or insta_labelsB[i][0]==1):
                 labels = np.append(labels,np.array([[1]]), axis = 0)
@@ -262,48 +266,7 @@ def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
         return labels,instances
     else:
         return insta_labelsA, instances
-
-def get_data_SIML(cropped,cropped_maskA,cropped_maskB):
-    """
-    
-    Input:
-    
-    Output: 
-    
-    Labeling & Feature Extracion
-    
-    Problem = Necesito meterle defect = A,B,AB.. Pero Funcion defect tmb se llama Igual!
-    
-    """
-    instances =  np.empty((0,58), float)    #Cambiar 58 por numero de Features
-    insta_labelsA = np.empty((0,1), int)
-    insta_labelsB = np.empty((0,1), int)
-    (winW, winH) = (32, 32)                 #Descomposición en imágenes de 32 a 32 con corrimiento de a 32?. 
-    for (x, y, window_maskA,window) in sliding_window(cropped_maskA,cropped, stepSize=32, windowSize=(winW, winH)):
-        #if the window does not meet our desired window size, ignore it
-        if window_maskA.shape[0] != winH or window_maskA.shape[1] != winW:
-            continue
-        #Label defectA
-        if (defect(winW,winH,window_maskA)==True):
-            insta_labelsA = np.append(insta_labelsA,np.array([[1]]), axis = 0)
-        else:
-            insta_labelsA = np.append(insta_labelsA,np.array([[0]]), axis = 0)
-    for (x, y, window_maskB,window) in sliding_window(cropped_maskB,cropped, stepSize=32, windowSize=(winW, winH)):
-        #if the window does not meet our desired window size, ignore it
-        if window_maskB.shape[0] != winH or window_maskB.shape[1] != winW:
-            continue     
-        #Label defectB
-        if (defect(winW,winH,window_maskB)==True):
-            insta_labelsB = np.append(insta_labelsB,np.array([[1]]), axis = 0)
-        else:
-            insta_labelsB = np.append(insta_labelsB,np.array([[0]]), axis = 0)
-        #Extract Features        
-        instance = extract_features(window)
-        instance.resize(1,len(instance))
-        instances = np.append(instances,instance,axis=0)
-    insta_labels = np.concatenate((insta_labelsA,insta_labelsB),axis=1)        
-    return insta_labels, instances
-
+        
 def get_data_MISL(cropped,cropped_maskA = None,cropped_maskB = None):
     """        
     Labeling & Feature Extracion     
@@ -335,9 +298,58 @@ def get_data_MISL(cropped,cropped_maskA = None,cropped_maskB = None):
         labels,bag = get_data_SISL(cropped)
         return 0, bag
 
+def get_data_SIML(cropped,cropped_maskA,cropped_maskB):
+    """
+    
+    Input:
+    
+    Output: 
+    
+    Labeling & Feature Extracion
+    
+    
+    """
+    
+    instances =  np.empty((0,58), float)    #Cambiar 58 por numero de Features
+    insta_labelsA = np.empty((0,1), int)
+    insta_labelsB = np.empty((0,1), int)
+    (winW, winH) = (32, 32)                 #Descomposición en imágenes de 32 a 32 con corrimiento de a 32?. 
+    
+    #If defect is None
+    if cropped_maskA is None: 
+        cropped_maskA = np.zeros(cropped.shape[:2], dtype = "uint8")
+    #If is just one defect
+    if cropped_maskB is None: 
+        cropped_maskB = np.zeros(cropped.shape[:2], dtype = "uint8")
+
+    for (x, y, window_maskB,window) in sliding_window(cropped_maskB,cropped, stepSize=32, windowSize=(winW, winH)):
+        #if the window does not meet our desired window size, ignore it
+        if window_maskB.shape[0] != winH or window_maskB.shape[1] != winW:
+            continue
+        #Label defectA
+        if (defect(winW,winH,window_maskB)==True):
+            insta_labelsB = np.append(insta_labelsB,np.array([[1]]), axis = 0)
+        else:
+            insta_labelsB = np.append(insta_labelsB,np.array([[0]]), axis = 0)
+            
+    for (x, y, window_maskA,window) in sliding_window(cropped_maskA,cropped, stepSize=32, windowSize=(winW, winH)):
+        #if the window does not meet our desired window size, ignore it
+        if window_maskA.shape[0] != winH or window_maskA.shape[1] != winW:
+            continue     
+        #Label defectB
+        if (defect(winW,winH,window_maskA)==True):
+            insta_labelsA = np.append(insta_labelsA,np.array([[1]]), axis = 0)
+        else:
+            insta_labelsA = np.append(insta_labelsA,np.array([[0]]), axis = 0)
+        #Extract Features        
+        instance = extract_features(window)
+        instance.resize(1,len(instance))
+        instances = np.append(instances,instance,axis=0)
+    insta_labels = np.concatenate((insta_labelsA,insta_labelsB),axis=1)        
+    return insta_labels, instances
+
 def get_data_MIML(cropped,cropped_maskA,cropped_maskB):
     """
-        
     Input:
     
     Output: 
@@ -347,7 +359,6 @@ def get_data_MIML(cropped,cropped_maskA,cropped_maskB):
     insta_labelsA = insta_labels[:,[0]]
     insta_labelsB = insta_labels[:,[1]]
     bag = instances
-    
     if 1 in insta_labelsA:
         labelA = 1
     else:
@@ -358,6 +369,7 @@ def get_data_MIML(cropped,cropped_maskA,cropped_maskB):
         labelB = 0
     label_bag = np.array([[labelA,labelB]])
     return label_bag, bag
+        
     
 def get_labels_defectA(path,class_number,num,exp='',defect='',degrees=False):
     """

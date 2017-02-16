@@ -31,7 +31,7 @@ cv2.imshow("cropped_maskB", cropped_maskB)
 cv2.destroyAllWindows()
 
 #SISL [1 imagen]
-labels_A,instances_A = get_data_SISL(cropped) #No defect
+labels_NO,instances_NO = get_data_SISL(cropped) #No defect
 labels_A,instances_A = get_data_SISL(cropped,cropped_maskA) #defectA
 labels_B,instances_B = get_data_SISL(cropped,cropped_maskB) #defectB
 labels_AB,instances_AB = get_data_SISL(cropped,cropped_maskA,cropped_maskB) #defectAB
@@ -43,12 +43,13 @@ label_bagB, bagB = get_data_MISL(cropped,cropped_maskB)
 label_bagAB, bagAB = get_data_MISL(cropped,cropped_maskA,cropped_maskB)
          
 #SIML[1 imagen]
-insta_labels, instances = get_data_SIML(cropped,cropped_maskA,cropped_maskB)
-            
-#MIML[1 imagen]
-labels_bag, bag = get_data_MIML(cropped,cropped_maskA,cropped_maskB)
+insta_labels_NO, instancesNO = get_data_SIML(cropped,cropped_maskA=None,cropped_maskB=None)
+insta_labels_A, instances_A = get_data_SIML(cropped,cropped_maskA,cropped_maskB=None)
+insta_labelsB, instancesB = get_data_SIML(cropped,cropped_maskA=None,cropped_maskB=cropped_maskB)
+insta_labels_AB, instances_AB = get_data_SIML(cropped,cropped_maskA,cropped_maskB)
 
-    
-
-        
-
+#MIML[1 imagen]  
+labels_bagA, bagA = get_data_MIML(cropped,cropped_maskA=None,cropped_maskB=None)          
+labels_bagA, bagA = get_data_MIML(cropped,cropped_maskA=cropped_maskA,cropped_maskB=None)
+labels_bagB, bagB = get_data_MIML(cropped,cropped_maskA=None,cropped_maskB=cropped_maskB)
+labels_bagAB, bagAB = get_data_MIML(cropped,cropped_maskA=cropped_maskA,cropped_maskB=cropped_maskB)

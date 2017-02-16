@@ -7,12 +7,16 @@ from utils_dagm import WeakLabeling, get_data_SISL, get_data_SIML, get_data_MISL
 
 #Path
 path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'
-#Defect Type
-defect = 'A'
 #Class Number
-class_number = 2
+class_number = 1
 #Experiment Number
 number_experimet = 1
+
+#Defect Type
+defect = 'A'
+defect = 'B'
+defect = 'AB'
+defect = 'No'
 
 #------#
 #-SISL-#
@@ -72,15 +76,18 @@ for i in range (1,100):
 #Load Data
 
 #------#
-#-SIML-#
+#-MIML-#
 #------#
+defect = 'No'
+defect = 'AB'
+
 Bags = []
 labels_bags = np.empty((0,2), int)
 for i in range (1,100):
     #Image number 
     num = i
     #WeakLabeling
-    cropped,cropped_maskA,cropped_maskB = WeakLabeling(path,num,class_number,defect = 'AB',exp = True)
+    cropped,cropped_maskA,cropped_maskB = WeakLabeling(path,num,class_number,defect = defect,exp = True)
     labels_bag, bag = get_data_MIML(cropped,cropped_maskA,cropped_maskB)
     Bags.append(bag)
     labels_bags = np.concatenate((labels_bags, np.array([labels_bag]).reshape(1,2)), axis=0)
