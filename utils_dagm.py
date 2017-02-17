@@ -100,7 +100,7 @@ def add_defect_B(c11, c22, A, B, blured, image):
     image[0:rows, 0:cols ] = dst
     return image
     
-def defect(X,Y,window_mask):
+def Defect(X,Y,window_mask):
     """
     Input:
     
@@ -213,7 +213,7 @@ def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
         cropped_maskB = Cropped Mask For Defect 2.
     Output: 
         If defect is AB return generalization of defect and respective defects as one. 
-        Otherwise if defect is A or B(One Defect) return instances and labels accordingly. 
+        Otherwise if defect is 1 or 2(One Defect) return instances and labels accordingly. 
     
     TO DO: Change number of Feature from 58 to X
     """
@@ -223,14 +223,15 @@ def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
     insta_labelsA = np.empty((0,1), int)
     insta_labelsB = np.empty((0,1), int)
             
-    #Check If image contains DefectB
+    #Check If image contains Defect 2
     if cropped_maskB is None:
         cropped_maskB = np.zeros(cropped.shape[:2], dtype = "uint8")
-        
+       
+    #Check If image contains Defect 1
     if cropped_maskA is None:
         cropped_maskA = np.zeros(cropped.shape[:2], dtype = "uint8")
             
-    #Check If image contains DefectB
+    #If image contains Defect 2 Record labels of defect
     if cropped_maskB is not None:
         insta_labelsB = np.empty((0,1), int)
         for (x, y, window_maskB,window) in sliding_window(cropped_maskB,cropped, stepSize=32, windowSize=(winW, winH)):
@@ -238,16 +239,17 @@ def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
             if window_maskB.shape[0] != winH or window_maskB.shape[1] != winW:
                 continue
             #Label defectB
-            if (defect(winW,winH,window_maskB)==True):
+            if (Defect(winW,winH,window_maskB)==True):
                 insta_labelsB = np.append(insta_labelsB,np.array([[1]]), axis = 0)
             else:
                 insta_labelsB = np.append(insta_labelsB,np.array([[0]]), axis = 0)
                 
+    #Do labeling and feature extraction         
     for (x, y, window_mask,window) in sliding_window(cropped_maskA,cropped, stepSize=32, windowSize=(winW, winH)):
         #if the window does not meet our desired window size, ignore it
         if window_mask.shape[0] != winH or window_mask.shape[1] != winW:
             continue
-        if (defect(winW,winH,window_mask)==True):
+        if (Defect(winW,winH,window_mask)==True):
             insta_labelsA = np.append(insta_labelsA,np.array([[1]]), axis = 0)
         else:
             insta_labelsA = np.append(insta_labelsA,np.array([[0]]), axis = 0)
@@ -256,8 +258,8 @@ def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
         instance.resize(1,len(instance))
         instances = np.append(instances,instance,axis=0)
         
-    #If cropped_maskB & cropped_maskA exist then defect is AB[Generalization]
-    if cropped_maskA is not None and cropped_maskB is not None:
+    #If cropped_mask1 & cropped_mask2 exist then defect is AB[Generalization]
+    if 255 in cropped_maskA  and 255 in cropped_maskB:
         for i in range(0,len(insta_labelsB)):
             if (insta_labelsA[i][0]==1 or insta_labelsB[i][0]==1):
                 labels = np.append(labels,np.array([[1]]), axis = 0)
@@ -300,12 +302,13 @@ def get_data_MISL(cropped,cropped_maskA = None,cropped_maskB = None):
 
 def get_data_SIML(cropped,cropped_maskA,cropped_maskB):
     """
+    With SIML you can extract all combination from instance in Image with AB {0,1}{0,0}{1,0}{1,1}
     
     Input:
     
     Output: 
     
-    Labeling & Feature Extracion
+    Labeling & Feature Extracion 
     
     
     """
@@ -327,7 +330,7 @@ def get_data_SIML(cropped,cropped_maskA,cropped_maskB):
         if window_maskB.shape[0] != winH or window_maskB.shape[1] != winW:
             continue
         #Label defectA
-        if (defect(winW,winH,window_maskB)==True):
+        if (Defect(winW,winH,window_maskB)==True):
             insta_labelsB = np.append(insta_labelsB,np.array([[1]]), axis = 0)
         else:
             insta_labelsB = np.append(insta_labelsB,np.array([[0]]), axis = 0)
@@ -337,7 +340,7 @@ def get_data_SIML(cropped,cropped_maskA,cropped_maskB):
         if window_maskA.shape[0] != winH or window_maskA.shape[1] != winW:
             continue     
         #Label defectB
-        if (defect(winW,winH,window_maskA)==True):
+        if (Defect(winW,winH,window_maskA)==True):
             insta_labelsA = np.append(insta_labelsA,np.array([[1]]), axis = 0)
         else:
             insta_labelsA = np.append(insta_labelsA,np.array([[0]]), axis = 0)
@@ -350,9 +353,12 @@ def get_data_SIML(cropped,cropped_maskA,cropped_maskB):
 
 def get_data_MIML(cropped,cropped_maskA,cropped_maskB):
     """
+    
+    With MIML is necesary images of defects AB, A, B and None
+    
     Input:
     
-    Output: 
+    Output:
     
     """
     insta_labels, instances = get_data_SIML(cropped,cropped_maskA,cropped_maskB)
