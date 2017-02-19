@@ -12,6 +12,10 @@ from shutil import copyfile
 from skimage.feature import hog
 from skimage import color
 from localbinarypatterns import LocalBinaryPatterns
+from balu.ImageProcessing import Bim_segbalu
+from Bfx_basicint import Bfx_basicint
+from skimage.feature import hog
+import mahotas.features
 
 def add_salt(image,cl_number):
     """
@@ -155,14 +159,49 @@ def ellipse_inside_rect(x1,y1,x,d4):
     return c11, c22, A, B
     
 def extract_features (image):
-    window_gray = color.rgb2gray(image)     
-    #HOG [Fix Dimentionality]
-    fd, _ = hog(window_gray, orientations=8, pixels_per_cell=(16, 16),
-                cells_per_block=(1, 1), visualise=True, feature_vector = True)
+    """
+    Extract Features. 
+        -> Features Extracted: 
+            * LBP
+            * Bfx_Basicint
+            * Haralick
+            * free Threshold Adjacency Statistics
+            * Zernike Moments
+            * HOG
+
+    """    
+    gray_image = color.rgb2gray(image)
+    
     #LBP Features
-    desc = LocalBinaryPatterns(24, 8)
-    hist = desc.describe(window_gray)        
-    features = np.concatenate((fd, hist), axis=0)
+    desc = LocalBinaryPatterns(12, 4)
+    lbp_hist = desc.describe(gray_image)
+    lbp_hist = lbp_hist.reshape(1,len(lbp_hist))
+
+    #Bfx_Basicint
+    R,_,_ = Bim_segbalu(gray_image)
+    options = {'show': True, 'mask': 5}
+    basicint, Xn = Bfx_basicint(gray_image,R,options)
+
+    #Haralick features
+    haralick = mahotas.features.haralick(gray_image).mean(0)
+    haralick = haralick.reshape(1,len(haralick))
+
+    #parameter free Threshold Adjacency Statistics
+    pftas = mahotas.features.pftas(gray_image)
+    pftas = pftas.reshape(1,len(pftas))
+
+    #Zernike Moments
+    zernike = mahotas.features.zernike_moments(gray_image, radius=2)
+    zernike = zernike.reshape(1,len(zernike))
+
+    #HOG [Fix Dimentionality]
+    HOG = hog(gray_image, orientations=8, pixels_per_cell=(16, 16),
+                    cells_per_block=(1, 1), visualise=False)
+    HOG = HOG.reshape(1,len(HOG))
+
+    #Join Features
+    features = np.concatenate((lbp_hist,basicint,haralick,pftas,zernike,HOG), axis=1)
+    
     return features
     
 def get_coordinates_crop(x1,x2,y1,y2,length,width): 
@@ -521,8 +560,11 @@ def load_image_dagm(path,num_image,class_number,defect = '_def',exp = ''):
     Output: 
         image = Returned image
     """
+    
     if exp == True:
         pathF = path+str(class_number)+'/Cl_'+str(class_number)+'_'+defect
+        if defect =='NO':
+            defect = ''
         filename = 'Cl_'+str(class_number)+'_'+str(num_image)+'_'+defect+'.png'
         image = cv2.imread(pathF+'/'+filename)
     else:
@@ -853,17 +895,17 @@ def WeakLabeling(path,num,class_number,defect = 'X',exp = True):
     mask = np.zeros(image.shape[:2], dtype = "uint8") 
     #get roi
     roi_labels = get_roi_rect(path,class_number,num,exp=True,defect=defect)
-    if defect=='A': 
+    if defect == 'A': 
         #get labels defectA
         dfA_A = get_labels_defectA(path,class_number,num,exp=True,defect='A',degrees=True)    
         #Draw Defect on Mask
         cv2.ellipse(mask,(dfA_A['x_position_center'],dfA_A['y_position_center']),(dfA_A['semi_major_ax'],dfA_A['semi_minor_ax']),dfA_A['rotation_angle'],0,360,255,-1)  #Draw Ellipse [Ground Truth]
-    elif defect=='B':
+    elif defect == 'B':
         #get labels defectBs
         dfB_B = get_labels_defectB(path,class_number,num,exp=True,defect='B')
         #Draw Defect on Mask
         cv2.rectangle(mask,(dfB_B['x1'],dfB_B['y1']),(dfB_B['x2'],dfB_B['y2']),255,-1)
-    elif defect =='AB':
+    elif defect == 'AB':
         dfAB_A = get_labels_defectA(path,class_number,num,exp=True,defect='AB',degrees=True)
         dfAB_B = get_labels_defectB(path,class_number,num,exp=True,defect='AB')
         maskA = np.zeros(image.shape[:2], dtype = "uint8")

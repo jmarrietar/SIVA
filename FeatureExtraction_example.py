@@ -15,12 +15,12 @@ from Bfx_basicint import Bfx_basicint
 from skimage.feature import hog
 import numpy as np
 from mahotas.features import surf
-from pylab import imshow,show
 
 
 #Load Image
 filename = 'Cl_1_2_AB.png'
 image = cv2.imread(filename)
+image = image[0:32,0:32]
 
 #convert image to grayscale
 gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -48,10 +48,11 @@ zernike = mahotas.features.zernike_moments(gray_image, radius=2)
 zernike = zernike.reshape(1,len(zernike))
 
 #HOG [Fix Dimentionality]
-hog = hog(gray_image, orientations=8, pixels_per_cell=(8, 8),
+HOG = hog(gray_image, orientations=8, pixels_per_cell=(16, 16),
                     cells_per_block=(1, 1), visualise=False)
-hog = hog.reshape(1,len(hog))
+HOG = HOG.reshape(1,len(HOG))
 
+"""
 #SURF
 colors = np.array([(0,255,0)])
 l, w = gray_image.shape
@@ -62,6 +63,7 @@ sp3 = surf.descriptors(gray_image, a, is_integral=False, descriptor_only=True)
 f2 = surf.show_surf(gray_image, sp2,colors = colors)
 imshow(f2)
 show()
+"""
 
 #Join Features
-features = np.concatenate((lbp_hist,basicint,haralick,pftas,zernike,hog,sp3), axis=1)
+features = np.concatenate((lbp_hist,basicint,haralick,pftas,zernike,HOG), axis=1)
