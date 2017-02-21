@@ -8,7 +8,7 @@ from utils_dagm import WeakLabeling, get_data_SISL, get_data_SIML, get_data_MISL
 
 #Path
 path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'
-ClassNumber = 2
+ClassNumber = 1
 number_experimet = 1
                                         #------#
                                         #-SISL-#
