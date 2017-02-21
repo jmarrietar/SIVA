@@ -1,2 +1,3 @@
 *.pyc
-*.pickle
+*.pckl
+.DS_Store
