@@ -8,7 +8,7 @@ from utils_dagm import WeakLabeling, get_data_SISL, get_data_SIML, get_data_MISL
 
 #Path
 path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'
-ClassNumber = 1
+ClassNumber = 2
 number_experimet = 1
                                         #------#
                                         #-SISL-#
@@ -16,12 +16,12 @@ number_experimet = 1
 LabelType = 'SingleLabel'
 InstanceType = 'SIL'
 #LabelType = 'ALL'
-defect = 'A'
+#defect = 'A'
 #defect = 'B'
 #defect = 'AB'
-#defect = 'NO'
+defect = 'NO'
 
-X_sisl =  np.empty((0,58), float)    #58 is the number of features [Change]
+X_sisl =  np.empty((0,144), float)    #58 is the number of features [Change]
 Y_sisl = np.empty((0,1), int)
 
 for i in range (1,100):
@@ -84,7 +84,7 @@ for i in range (1,100):
 
 #Save Data
 path_data = '/Users/josemiguelarrieta/Documents/SIVA/ExperimentsData/'+LabelType+'/defect'+defect+'/'+'class'+str(ClassNumber)+'/'+InstanceType+'/'
-f = open(path_data+'X_misl.pckl', 'wb')
+f = open(path_data+'Bags_misl.pckl', 'wb')
 pickle.dump(X_sisl, f)
 f.close()
 f = open(path_data+'Y_misl.pckl', 'wb')
@@ -92,7 +92,7 @@ pickle.dump(Y_sisl, f)
 f.close()
 
 #Load Data
-f = open(path_data+'X_misl.pckl', 'rb') 
+f = open(path_data+'Bags_misl.pckl', 'rb') 
 X_sisl2 = pickle.load(f)
 f.close()
 f = open(path_data+'Y_misl.pckl', 'rb') 
@@ -109,7 +109,7 @@ defect = 'A'
 #defect = 'AB'
 #defect = 'NO'
 
-X_siml =  np.empty((0,58), float)    #58 is the number of features [Change]
+X_siml =  np.empty((0,144), float)    #58 is the number of features [Change]
 Y_siml = np.empty((0,2), int)
 
 for i in range (1,100):
@@ -177,7 +177,7 @@ for i in range (1,100):
     
 #Save Data
 path_data = '/Users/josemiguelarrieta/Documents/SIVA/ExperimentsData/'+LabelType+'/defect'+defect+'/'+'class'+str(ClassNumber)+'/'+InstanceType+'/'
-f = open(path_data+'X_miml.pckl', 'wb')
+f = open(path_data+'Bags_miml.pckl', 'wb')
 pickle.dump(X_sisl, f)
 f.close()
 f = open(path_data+'Y_miml.pckl', 'wb')
@@ -185,7 +185,7 @@ pickle.dump(Y_sisl, f)
 f.close()
 
 #Load Data
-f = open(path_data+'X_miml.pckl', 'rb') 
+f = open(path_data+'Bags_miml.pckl', 'rb') 
 X_sisl2 = pickle.load(f)
 f.close()
 f = open(path_data+'Y_miml.pckl', 'rb') 

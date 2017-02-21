@@ -170,7 +170,7 @@ def extract_features (image):
             * HOG
 
     """    
-    gray_image = color.rgb2gray(image)
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
     #LBP Features
     desc = LocalBinaryPatterns(12, 4)
@@ -254,11 +254,10 @@ def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
         If defect is AB return generalization of defect and respective defects as one. 
         Otherwise if defect is 1 or 2(One Defect) return instances and labels accordingly. 
     
-    TO DO: Change number of Feature from 58 to X
     """
     (winW, winH) = (32, 32)                 #Descomposición en imágenes de 32 a 32 con corrimiento de a 32?. 
     labels = np.empty((0,1), int)
-    instances =  np.empty((0,58), float)    #Cambiar 58 por numero de Features
+    instances =  np.empty((0,144), float)    #144 numero de Features
     insta_labelsA = np.empty((0,1), int)
     insta_labelsB = np.empty((0,1), int)
             
@@ -294,7 +293,7 @@ def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
             insta_labelsA = np.append(insta_labelsA,np.array([[0]]), axis = 0)
         #Extract Features
         instance = extract_features(window) 
-        instance.resize(1,len(instance))
+        #instance.resize(1,len(instance))
         instances = np.append(instances,instance,axis=0)
         
     #If cropped_mask1 & cropped_mask2 exist then defect is AB[Generalization]
@@ -352,7 +351,7 @@ def get_data_SIML(cropped,cropped_maskA,cropped_maskB):
     
     """
     
-    instances =  np.empty((0,58), float)    #Cambiar 58 por numero de Features
+    instances =  np.empty((0,144), float)    #144 numero de Features
     insta_labelsA = np.empty((0,1), int)
     insta_labelsB = np.empty((0,1), int)
     (winW, winH) = (32, 32)                 #Descomposición en imágenes de 32 a 32 con corrimiento de a 32?. 
@@ -385,7 +384,7 @@ def get_data_SIML(cropped,cropped_maskA,cropped_maskB):
             insta_labelsA = np.append(insta_labelsA,np.array([[0]]), axis = 0)
         #Extract Features        
         instance = extract_features(window)
-        instance.resize(1,len(instance))
+        #instance.resize(1,len(instance))
         instances = np.append(instances,instance,axis=0)
     insta_labels = np.concatenate((insta_labelsA,insta_labelsB),axis=1)        
     return insta_labels, instances
