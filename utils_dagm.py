@@ -10,11 +10,9 @@ import math
 import pickle
 from shutil import copyfile
 from skimage.feature import hog
-from skimage import color
 from localbinarypatterns import LocalBinaryPatterns
 from balu.ImageProcessing import Bim_segbalu
 from Bfx_basicint import Bfx_basicint
-from skimage.feature import hog
 import mahotas.features
 
 def add_salt(image,cl_number):
@@ -700,6 +698,19 @@ def rectangle_expanded_roi(gt):
     x2 = c1 + int(x)*2
     y2 = c2 + int(y)*2
     return x1, y1, x2, y2, x, y
+    
+def RemodeNanInstances(bag):
+    """
+    Remove Instances with Nan columns
+    """
+    n = len(bag)
+    for i in range(0,n):
+        A = bag[i]
+        nanrows = np.unique(np.where(np.isnan(A))[0])
+        if len (nanrows)>0: 
+            A = np.delete(A, nanrows, 0)
+        bag[i] = A
+    return bag
     
 def save_image_defect(defect,num,cl_number,image):
     """

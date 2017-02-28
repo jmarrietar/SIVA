@@ -51,10 +51,10 @@ f.close()
 
 #Load Data
 f = open(path_data+'X_sisl.pckl', 'rb') 
-X_sisl2 = pickle.load(f)
+X_sisl = pickle.load(f)
 f.close()
 f = open(path_data+'Y_sisl.pckl', 'rb') 
-Y_sisl2 = pickle.load(f)
+Y_sisl = pickle.load(f)
 f.close()
 
                                         #------#
@@ -98,10 +98,10 @@ f.close()
 
 #Load Data
 f = open(path_data+'Bags_misl.pckl', 'rb') 
-X_sisl2 = pickle.load(f)
+X_misl = pickle.load(f)
 f.close()
 f = open(path_data+'Y_misl.pckl', 'rb') 
-Y_sisl2 = pickle.load(f)
+Y_misl = pickle.load(f)
 f.close()
 
                                         #------#
@@ -148,10 +148,10 @@ f.close()
 
 #Load Data
 f = open(path_data+'X_siml.pckl', 'rb') 
-X_sisl2 = pickle.load(f)
+X_siml = pickle.load(f)
 f.close()
 f = open(path_data+'Y_siml.pckl', 'rb') 
-Y_sisl2 = pickle.load(f)
+Y_siml = pickle.load(f)
 f.close()
 
                                         #------#
@@ -197,8 +197,8 @@ f.close()
 
 #Load Data
 f = open(path_data+'Bags_miml.pckl', 'rb') 
-X_sisl2 = pickle.load(f)
+X_miml = pickle.load(f)
 f.close()
 f = open(path_data+'Y_miml.pckl', 'rb') 
-Y_sisl2 = pickle.load(f)
+Y_miml = pickle.load(f)
 f.close()
