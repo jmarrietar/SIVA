@@ -8,12 +8,12 @@ import cv2
 import numpy as np
 import math
 import pickle
+import mahotas.features
 from shutil import copyfile
 from skimage.feature import hog
 from localbinarypatterns import LocalBinaryPatterns
 from balu.ImageProcessing import Bim_segbalu
 from Bfx_basicint import Bfx_basicint
-import mahotas.features
 
 def add_salt(image,cl_number):
     """
@@ -612,6 +612,48 @@ def load_list_selected_images(defect,class_number,number_experimet):
     lista = pickle.load(f)
     f.close()
     return lista
+    
+def LoadDataEvaluation(LabelType,defect,ClassNumber,InstanceType):
+    if InstanceType == 'SISL':
+        path_data = '/Users/josemiguelarrieta/Documents/SIVA/ExperimentsData/'+LabelType+'/defect'+defect+'/'+'class'+str(ClassNumber)+'/'+InstanceType+'/'
+        f = open(path_data+'X_sisl.pckl', 'rb') 
+        X_sisl = pickle.load(f)
+        f.close()
+        f = open(path_data+'Y_sisl.pckl', 'rb') 
+        Y_sisl = pickle.load(f)
+        f.close()
+        X = X_sisl
+        Y = Y_sisl
+    elif InstanceType == 'SIML':
+        path_data = '/Users/josemiguelarrieta/Documents/SIVA/ExperimentsData/'+LabelType+'/defect'+defect+'/'+'class'+str(ClassNumber)+'/'+InstanceType+'/'
+        f = open(path_data+'X_siml.pckl', 'rb') 
+        X_siml = pickle.load(f)
+        f.close()
+        f = open(path_data+'Y_siml.pckl', 'rb') 
+        Y_siml = pickle.load(f)
+        f.close()
+        X = X_siml
+        Y = Y_siml
+    elif  InstanceType == 'MISL':
+        path_data = '/Users/josemiguelarrieta/Documents/SIVA/ExperimentsData/'+LabelType+'/defect'+defect+'/'+'class'+str(ClassNumber)+'/'+InstanceType+'/'
+        f = open(path_data+'Bags_misl.pckl', 'rb') 
+        X_misl = pickle.load(f)
+        f.close()
+        f = open(path_data+'Y_misl.pckl', 'rb') 
+        Y_misl = pickle.load(f)
+        X = X_misl
+        Y = Y_misl
+    elif InstanceType == 'MIML':
+        path_data = '/Users/josemiguelarrieta/Documents/SIVA/ExperimentsData/'+LabelType+'/defect'+defect+'/'+'class'+str(ClassNumber)+'/'+InstanceType+'/'
+        f = open(path_data+'Bags_miml.pckl', 'rb') 
+        X_miml = pickle.load(f)
+        f.close()
+        f = open(path_data+'Y_miml.pckl', 'rb') 
+        Y_miml = pickle.load(f)
+        f.close()
+        X = X_miml
+        Y = Y_miml
+    return X,Y
     
 def move_selected_images(lista,defect,class_number,number_experimet):
     """
