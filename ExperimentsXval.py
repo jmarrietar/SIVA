@@ -13,6 +13,7 @@ from utils_dagm import RemodeNanInstances
 from utils_dagm import LoadDataEvaluation
 from sklearn.semi_supervised import label_propagation
 from Evaluation import evaluationEnsemble
+from sklearn.preprocessing import normalize 
 import numpy as np
 import sys
 
@@ -21,6 +22,8 @@ path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/imag
 ClassNumber = 1
 number_experimet = 1
 folds = 10
+
+
                                         #------#
                                         #-SISL-#
                                         #------#
@@ -35,13 +38,16 @@ nanrows = np.unique(np.where(np.isnan(X_sisl))[0])
 X_sisl = np.delete(X_sisl, nanrows, 0)
 Y_sisl = np.delete(Y_sisl, nanrows, 0)
 
+#Normalize 
+X_sisl = normalize(X_sisl,norm = 'l2',axis=0)
+
+
 #Sin etiquetas
 rng = np.random.RandomState(0)
 Y_sisl[rng.rand(len(Y_sisl)) < 0.3] = -1
 
 label_spread = label_propagation.LabelSpreading(kernel='knn', alpha=1.0)
 
-folds = 10
 skf = StratifiedKFold(Y_sisl.reshape(len(Y_sisl)), n_folds=folds)
 results = [] 
 AUC = []
@@ -58,12 +64,11 @@ for train_index, test_index in skf:
     predictions = label_spread.predict(X_test) 
     try:
         metrics = evaluationEnsemble(truelab=Y_test,outlab=predictions)
+        AUC.append(metrics[9])
+        F.append(metrics[7])
+        results.append(metrics)
     except ZeroDivisionError:
         print "Oops!  That was no valid number.  Try again..."
-        metrics =[0,0,0,0,0,0,0,0,0,0,0]
-    AUC.append(metrics[9])
-    F.append(metrics[7])
-    results.append(metrics)
     fold +=1
     
 target = open('Results.txt', 'a')
@@ -86,13 +91,15 @@ nanrows = np.unique(np.where(np.isnan(X_siml))[0])
 X_siml = np.delete(X_siml, nanrows, 0)
 Y_siml = np.delete(Y_siml, nanrows, 0)
 
+#Normalize 
+X_siml = normalize(X_siml,norm = 'l2',axis=0)
 
 labelsAB = Y_siml[:,[0]] * Y_siml[:,[1]]
 skf = StratifiedKFold(labelsAB.reshape(len(labelsAB)), n_folds=folds)
-folds = 1
 results = [] 
 AUC = []   
 F = []
+fold = 1
 classif = OneVsRestClassifier(SVC(kernel='linear'))
 
 for train_index, test_index in skf:
@@ -103,16 +110,15 @@ for train_index, test_index in skf:
     sys.stdout.write('Fold# '+str(fold)+'...')
     classif.fit(X_train, Y_train)
     predictions = classif.predict(X_test)
-    try:
-        predictions2sl = Y_test[:,[0]] * Y_test[:,[1]]
-        Ytest2sl = predictions[:,[0]] * predictions[:,[1]]
-        metrics = evaluationEnsemble(truelab=Ytest2sl,outlab=predictions2sl)
-    except ZeroDivisionError:
-        print "Oops!  That was no valid number.  Try again..."
-        metrics =[0,0,0,0,0,0,0,0,0,0,0]
+    #try:
+    predictions2sl = Y_test[:,[0]] * Y_test[:,[1]]
+    Ytest2sl = predictions[:,[0]] * predictions[:,[1]]
+    metrics = evaluationEnsemble(truelab=Ytest2sl,outlab=predictions2sl)
     AUC.append(metrics[9])
     F.append(metrics[7])
     results.append(metrics)
+    #except ZeroDivisionError:
+        #print "Oops!  That was no valid number.  Try again..."
     fold +=1
     
 target = open('Results.txt', 'a')
@@ -139,7 +145,8 @@ X_misl,Y_misl = LoadDataEvaluation(LabelType,defect,ClassNumber,InstanceType)
 #remove rows with nan columns
 X_misl = RemodeNanInstances(X_misl)
 
-folds = 10 
+#Normalize Bags
+X_misl = [normalize(bag,norm = 'l2',axis=0) for bag in X_misl]
 
 skf = StratifiedKFold(Y_misl.reshape(len(Y_misl)), n_folds=folds)
 fold = 1
@@ -158,14 +165,14 @@ for train_index, test_index in skf:
     predictions = SMILa.predict(X_test)
     try:
         metrics = evaluationEnsemble(truelab=Y_test,outlab=predictions)
+        AUC.append(metrics[9])
+        F.append(metrics[7])
+        results.append(metrics)
     except ZeroDivisionError:
         print "Oops!  That was no valid number.  Try again..."
-        metrics =[0,0,0,0,0,0,0,0,0,0,0]
-    AUC.append(metrics[9])
-    F.append(metrics[7])
-    results.append(metrics)
     fold +=1
 
+os.chdir('../../Documents/SIVA')
 target = open('Results.txt', 'a')
 target.write('Results '+InstanceType+"\n"+'Class'+str(ClassNumber)+"\n"+'F= '+str(np.mean(F))+"\n"+ 'AUC ='+str(np.mean(AUC))+"\n")
 target.close()
@@ -188,7 +195,10 @@ X_miml,Y_miml = LoadDataEvaluation(LabelType,defect,ClassNumber,InstanceType)
 #remove rows with nan columns 
 X_miml = RemodeNanInstances(X_miml)
 
-folds = 10 
+#Normalize Bags
+X_miml = [normalize(bag,norm = 'l2',axis=0) for bag in X_miml]
+
+
 labelsAB = Y_miml[:,[0]] * Y_miml[:,[1]]
 skf = StratifiedKFold(labelsAB.reshape(len(labelsAB)), n_folds=folds)
 prueba = []
@@ -201,7 +211,7 @@ for train_index, test_index in skf:
     X_test  = [X_miml[i] for i in test_index]
     Y_test  = Y_miml[test_index]
     sys.stdout.write('Fold# '+str(fold)+'...')
-    sio.savemat('ExperimentsData/folds_miml/MIML'+'_'+str(ClassNumber)+'fold_'+str(fold)+'.mat', {'X_train':X_train,'Y_train':Y_train,'X_test':X_test,'Y_test':Y_test})
+    sio.savemat('ExperimentsData/folds_miml/MIML'+'_'+str(ClassNumber)+'fold_'+str(fold)+'.mat', {'X_train':X_train,'Y_train':Y_train,'X_test':X_test,'Y_test':Y_test,'fold':fold,'Class_number':ClassNumber})
     target = open('Results.txt', 'a')
     target.write('MIML'+'_'+str(ClassNumber)+'fold_'+str(fold)+'.mat'+' CREATED'+"\n")
     target.close()
