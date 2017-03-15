@@ -26,25 +26,47 @@ def evaluationEnsemble(truelab,outlab):
     FP  = np.sum(outlab[Io])
     TN  = np.sum(np.logical_not(outlab[Io])) 
     
-    
-    P = float(TP)/(TP+FP)
-    R = float(TP)/(TP+FN)
-    F = 2*(R*P)/(R+P)
-    G = np.sqrt(float(R)*(float(TN)/(TN+FP)))
-    
-    tpr = float(TP)/(TP+FN)
-    fpr = float(FP)/(FP+TN)
-    e = (float(FP)+FN)/(FP+FN+TP+TN)
+    try:
+        P = float(TP)/(TP+FP)
+    except ZeroDivisionError:
+        print "Oops!  That was no valid number."
+        P = 0
+    try:  
+        R = float(TP)/(TP+FN)
+    except ZeroDivisionError:
+        print "Oops!  That was no valid number."
+        R = 0 
+    try: 
+        F = 2*(R*P)/(R+P)
+    except ZeroDivisionError:
+        print "Oops!  That was no valid number."
+        F = 0
+    try: 
+        G = np.sqrt(float(R)*(float(TN)/(TN+FP)))
+    except ZeroDivisionError:
+        print "Oops!  That was no valid number."
+        G = 0 
+    try: 
+        tpr = float(TP)/(TP+FN)
+    except ZeroDivisionError:
+        tpr = 0 
+    try: 
+        fpr = float(FP)/(FP+TN)
+    except ZeroDivisionError:
+        print "Oops!  That was no valid number."
+        fpr = 0 
+    try: 
+        e = (float(FP)+FN)/(FP+FN+TP+TN)
+    except ZeroDivisionError:
+        print "Oops!  That was no valid number."
+        e = 0 
     
     if F is None:
         F = 0
-        
     if G is None:
         G = 0
-        
     if P is None:
         P = 0
-        
     if R is None:
         R = 0
         

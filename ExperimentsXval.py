@@ -62,13 +62,10 @@ for train_index, test_index in skf:
     sys.stdout.write('Fold# '+str(fold)+'...')
     label_spread.fit(X_train, Y_train)
     predictions = label_spread.predict(X_test) 
-    try:
-        metrics = evaluationEnsemble(truelab=Y_test,outlab=predictions)
-        AUC.append(metrics[9])
-        F.append(metrics[7])
-        results.append(metrics)
-    except ZeroDivisionError:
-        print "Oops!  That was no valid number.  Try again..."
+    metrics = evaluationEnsemble(truelab=Y_test,outlab=predictions)
+    AUC.append(metrics[9])
+    F.append(metrics[7])
+    results.append(metrics)
     fold +=1
     
 target = open('Results.txt', 'a')
@@ -84,7 +81,6 @@ InstanceType = 'SIML'
 defect = 'AB'
 
 X_siml,Y_siml = LoadDataEvaluation(LabelType,defect,ClassNumber,InstanceType)
-
 
 #remove rows with nan columns 
 nanrows = np.unique(np.where(np.isnan(X_siml))[0])
@@ -110,15 +106,12 @@ for train_index, test_index in skf:
     sys.stdout.write('Fold# '+str(fold)+'...')
     classif.fit(X_train, Y_train)
     predictions = classif.predict(X_test)
-    #try:
     predictions2sl = Y_test[:,[0]] * Y_test[:,[1]]
     Ytest2sl = predictions[:,[0]] * predictions[:,[1]]
     metrics = evaluationEnsemble(truelab=Ytest2sl,outlab=predictions2sl)
     AUC.append(metrics[9])
     F.append(metrics[7])
     results.append(metrics)
-    #except ZeroDivisionError:
-        #print "Oops!  That was no valid number.  Try again..."
     fold +=1
     
 target = open('Results.txt', 'a')
@@ -163,13 +156,10 @@ for train_index, test_index in skf:
     sys.stdout.write('Fold# '+str(fold)+'...')
     SMILa.fit(X_train, Y_train, type='average')
     predictions = SMILa.predict(X_test)
-    try:
-        metrics = evaluationEnsemble(truelab=Y_test,outlab=predictions)
-        AUC.append(metrics[9])
-        F.append(metrics[7])
-        results.append(metrics)
-    except ZeroDivisionError:
-        print "Oops!  That was no valid number.  Try again..."
+    metrics = evaluationEnsemble(truelab=Y_test,outlab=predictions)
+    AUC.append(metrics[9])
+    F.append(metrics[7])
+    results.append(metrics)
     fold +=1
 
 os.chdir('../../Documents/SIVA')
