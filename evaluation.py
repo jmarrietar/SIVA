@@ -26,6 +26,8 @@ def evaluationEnsemble(truelab,outlab):
     FP  = np.sum(outlab[Io])
     TN  = np.sum(np.logical_not(outlab[Io])) 
     
+    print('TP: '+str(TP)+' FN:'+str(FN)+' FP:'+str(FP)+' TN: '+str(TN))
+    
     try:
         P = float(TP)/(TP+FP)
     except ZeroDivisionError:
@@ -49,6 +51,7 @@ def evaluationEnsemble(truelab,outlab):
     try: 
         tpr = float(TP)/(TP+FN)
     except ZeroDivisionError:
+        print "Oops!  That was no valid number."
         tpr = 0 
     try: 
         fpr = float(FP)/(FP+TN)
