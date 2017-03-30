@@ -20,7 +20,7 @@ import sys
 
 #General Information 
 path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'
-ClassNumber = 4
+ClassNumber = 1
 number_experimet = 1
 folds = 10
 
@@ -163,8 +163,8 @@ AUC = []
 F = []
 
 #Algorithms
-#SMILa = simpleMIL() 
-SMILa = BOW()
+SMILa = simpleMIL()
+#SMILa = BOW()
 #SMILa = EMDD() 
 
 
@@ -176,10 +176,10 @@ for train_index, test_index in skf:
     X_test  = [X_misl[i] for i in test_index]
     Y_test  = Y_misl[test_index]
     sys.stdout.write('Fold# '+str(fold)+'...')
-    #SMILa.fit(X_train, Y_train, type='average') #SimpleMIL
+    SMILa.fit(X_train, Y_train, type='average') #SimpleMIL
     #SMILa.fit(X_train, Y_train) #EMDD 
     #SMILa.fit(X_train, Y_train,references = 3, citers = 5) #CNN
-    SMILa.fit(X_train, Y_train,k=10,covar_type = 'diag',n_iter = 20)#BOW
+    #SMILa.fit(X_train, Y_train,k=10,covar_type = 'diag',n_iter = 20)#BOW
     predictions = SMILa.predict(X_test)
     metrics = evaluationEnsemble(truelab=Y_test,outlab=predictions)
     AUC.append(metrics[9])
