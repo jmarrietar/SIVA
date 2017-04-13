@@ -20,7 +20,7 @@ import sys
 
 #General Information 
 path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'
-ClassNumber = 1
+ClassNumber = 5
 number_experimet = 1
 folds = 10
 
@@ -217,7 +217,8 @@ X_miml = [normalize(bag,norm = 'l2',axis=0) for bag in X_miml]
 X_miml, Y_miml = shuffle(X_miml, Y_miml, random_state=0)
 
 labelsAB = Y_miml[:,[0]] * Y_miml[:,[1]]
-skf = StratifiedKFold(labelsAB.reshape(len(labelsAB)), n_folds=folds)
+
+skf = StratifiedKFold(labelsAB.reshape(len(labelsAB)), n_folds=folds,shuffle=True)
 prueba = []
 test = []
 fold = 1
@@ -228,7 +229,7 @@ for train_index, test_index in skf:
     X_test  = [X_miml[i] for i in test_index]
     Y_test  = Y_miml[test_index]
     sys.stdout.write('Fold# '+str(fold)+'...')
-    sio.savemat('ExperimentsData/folds_miml/MIML'+'_'+str(ClassNumber)+'fold_'+str(fold)+'.mat', {'X_train':X_train,'Y_train':Y_train,'X_test':X_test,'Y_test':Y_test,'fold':fold,'Class_number':ClassNumber})
+    sio.savemat('ExperimentsData/folds_miml2/MIML'+'_'+str(ClassNumber)+'fold_'+str(fold)+'.mat', {'X_train':X_train,'Y_train':Y_train,'X_test':X_test,'Y_test':Y_test,'fold':fold,'Class_number':ClassNumber})
     target = open('Results.txt', 'a')
     target.write('MIML'+'_'+str(ClassNumber)+'fold_'+str(fold)+'.mat'+' CREATED'+"\n")
     target.close()
