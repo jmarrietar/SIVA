@@ -156,6 +156,7 @@ def ellipse_inside_rect(x1,y1,x,d4):
     c22 = A/2 + y11
     return c11, c22, A, B
     
+'''
 def extract_features (image):
     """
     Extract Features. 
@@ -201,6 +202,8 @@ def extract_features (image):
     features = np.concatenate((lbp_hist,basicint,haralick,pftas,zernike,HOG), axis=1)
     
     return features
+
+'''
     
 def get_coordinates_crop(x1,x2,y1,y2,length,width): 
     """
@@ -240,6 +243,7 @@ def get_coordinates_crop(x1,x2,y1,y2,length,width):
         end_y = y2        
     return start_x, end_x, start_y, end_y
     
+'''
 def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
     """ 
     Labeling & Feature Extracion     
@@ -294,8 +298,9 @@ def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
         #instance.resize(1,len(instance))
         instances = np.append(instances,instance,axis=0)
         
-    #If cropped_mask1 & cropped_mask2 exist then defect is AB[Generalization]
-    if 255 in cropped_maskA  and 255 in cropped_maskB:
+    #If cropped_mask1 & cropped_mask2 exist then defect is AB
+    #Si alguno de los windows tiene defecto, entonces es defectuoso. 
+    if 255 in cropped_maskA  or 255 in cropped_maskB:
         for i in range(0,len(insta_labelsB)):
             if (insta_labelsA[i][0]==1 or insta_labelsB[i][0]==1):
                 labels = np.append(labels,np.array([[1]]), axis = 0)
@@ -307,7 +312,7 @@ def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
         
 def get_data_MISL(cropped,cropped_maskA = None,cropped_maskB = None):
     """        
-    Labeling & Feature Extracion     
+    Labeling & Feature Extracion  
     
     Input:
         cropped = Cropped Section of Image. 
@@ -349,7 +354,7 @@ def get_data_SIML(cropped,cropped_maskA,cropped_maskB):
     
     """
     
-    instances =  np.empty((0,144), float)    #144 numero de Features
+    instances =  np.empty((0,144), float)    #144 Number of Features
     insta_labelsA = np.empty((0,1), int)
     insta_labelsB = np.empty((0,1), int)
     (winW, winH) = (32, 32)                 #Descomposición en imágenes de 32 a 32 con corrimiento de a 32?. 
@@ -412,6 +417,7 @@ def get_data_MIML(cropped,cropped_maskA,cropped_maskB):
     label_bag = np.array([[labelA,labelB]])
     return label_bag, bag
         
+'''
     
 def get_labels_defectA(path,class_number,num,exp='',defect='',degrees=False):
     """

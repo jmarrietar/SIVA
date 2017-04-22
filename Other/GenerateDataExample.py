@@ -5,8 +5,10 @@
 
 #Image Manipulation
 from __future__ import print_function
+"""
 import os
 os.chdir('Documents/SIVA')
+"""
 import cv2
 from utils_dagm import WeakLabeling, get_data_SISL, get_data_SIML, get_data_MISL, get_data_MIML
 
@@ -16,12 +18,15 @@ number_experimet = 1
 num = 1
 path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'
 
+"""
 #WeakLabeling defect A
 cropped,cropped_mask = WeakLabeling(path,num,class_number,defect = 'A',exp = True)
 
 cv2.imshow("cropped", cropped)
 cv2.imshow("cropped_mask", cropped_mask)
+"""
 
+"""
 #WeakLabeling defect AB [MULTILABEL]
 cropped,cropped_maskA,cropped_maskB = WeakLabeling(path,num,class_number,defect = 'AB',exp = True)
 
@@ -29,14 +34,16 @@ cv2.imshow("cropped", cropped)
 cv2.imshow("cropped_maskA", cropped_maskA)
 cv2.imshow("cropped_maskB", cropped_maskB)
 cv2.destroyAllWindows()
+"""
 
                 ###################
                 # SISL [1 imagen] #
                 ###################
+                
 class_number = 1
 num = 1
 
-
+"""
 defect = 'A' #Carpeta A
 cropped,cropped_maskA = WeakLabeling(path,num,class_number,defect = defect,exp = True)
 labels_A,instances_A = get_data_SISL(cropped,cropped_maskA) #defectA
@@ -44,6 +51,7 @@ labels_A,instances_A = get_data_SISL(cropped,cropped_maskA) #defectA
 defect = 'B' #Carpeta B
 cropped,cropped_maskB = WeakLabeling(path,num,class_number,defect = defect,exp = True)
 labels_B,instances_B = get_data_SISL(cropped,cropped_maskB) #defectB
+"""
 
 defect = 'AB' #Carpeta AB
 cropped,cropped_maskA,cropped_maskB = WeakLabeling(path,num,class_number,defect = defect,exp = True)

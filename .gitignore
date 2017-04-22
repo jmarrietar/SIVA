@@ -2,3 +2,5 @@
 *.DS_Store
 ExperimentsData/**/*.pckl
 ExperimentsData/**/*.mat
+ExperimentsData2/**/*.pckl
+ExperimentsData/**/*.mat
