@@ -1,8 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-import os
-os.chdir('Documents/SIVA')
+import sys
 import numpy as np
 import pickle
 from utils_dagm import WeakLabeling,load_image_dagm
@@ -10,7 +9,7 @@ from LabelExtractFeatures import get_data_SISL, get_data_SIML, get_data_MISL, ge
 
 #Path
 path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'
-ClassNumber = 1  #Pass argument!. 
+ClassNumber = sys.argv[1]
 defects =['AB','NO']
 
 """

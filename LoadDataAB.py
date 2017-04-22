@@ -11,8 +11,6 @@ import os
 os.chdir('Documents/SIVA')
 import pickle
 
-#Path
-path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'
 ClassNumber = 1  #Pass argument!. 
 defects =['AB','NO']
 
