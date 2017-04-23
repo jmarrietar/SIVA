@@ -4,8 +4,6 @@ Cross Validation for differents Algorithms paradigms.
 
 @author: josemiguelarrieta
 """
-import os
-os.chdir('Documents/SIVA')
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
@@ -20,34 +18,23 @@ import sys
 
 #General Information 
 path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'
-ClassNumber = 5
-number_experimet = 1
+ClassNumber = 2
 folds = 10
-
-
                                         #------#
                                         #-SISL-#
                                         #------#
-InstanceType = 'SISL'
-LabelType = 'ALL'
-defect = 'AB'
+                                    
+                                        
+#Load data
+LabelType = 'SL'
+paradigm = 'SISL'
+X_sisl,Y_sisl,instance_label_bags_SL = LoadDataEvaluation(ClassNumber,LabelType)
 
-X_sisl,Y_sisl = LoadDataEvaluation(LabelType,defect,ClassNumber,InstanceType)
+#remove rows with nan columns
+X_sisl,instance_label_bags_SL = RemodeNanInstances(X_sisl,instance_label_bags_SL) 
 
-#remove rows with nan columns 
-nanrows = np.unique(np.where(np.isnan(X_sisl))[0])
-X_sisl = np.delete(X_sisl, nanrows, 0)
-Y_sisl = np.delete(Y_sisl, nanrows, 0)
-
-#Normalize 
-X_sisl = normalize(X_sisl,norm = 'l2',axis=0)
-
-#Shuffle Data 
-X_sisl, Y_sisl = shuffle(X_sisl, Y_sisl, random_state=0)
-
-#Sin etiquetas
-rng = np.random.RandomState(0)
-Y_sisl[rng.rand(len(Y_sisl)) < 0.3] = -1
+#Normalize Bags
+X_sisl = [normalize(bag,norm = 'l2',axis=0) for bag in X_sisl]
 
 #kernel='knn'
 kernel = 'rbf'
@@ -58,47 +45,65 @@ results = []
 AUC = []
 F = []
 fold = 1
-
+Predictions = np.empty((0,1), int)
+    
 for train_index, test_index in skf:
-    X_train = X_sisl[train_index]
+    X_train = [X_sisl[i] for i in train_index]
     Y_train = Y_sisl[train_index]
-    X_test  = X_sisl[test_index]
+    instance_label_bags_SL_Train = [instance_label_bags_SL[i] for i in train_index]    
+    X_test  = [X_sisl[i] for i in test_index]
     Y_test  = Y_sisl[test_index]
+    instance_label_bags_SL_Test = [instance_label_bags_SL[i] for i in test_index] 
+    
     sys.stdout.write('Fold# '+str(fold)+'...')
-    label_spread.fit(X_train, Y_train)
-    predictions = label_spread.predict(X_test) 
-    metrics = evaluationEnsemble(truelab=Y_test,outlab=predictions)
+    #Bags to SI
+    X_train_all = np.vstack((X_train))
+    instance_label_bags_SL_Train_ALL = np.vstack((instance_label_bags_SL_Train))
+    
+    #Remove labels 30%
+    rng = np.random.RandomState(0)
+    instance_label_bags_SL_Train_ALL[rng.rand(len(instance_label_bags_SL_Train_ALL)) < 0.3] = -1
+    
+    #Fit model. 
+    label_spread.fit(X_train_all, instance_label_bags_SL_Train_ALL)
+    
+    #Test 
+    for i in range(len(X_test)):
+        predictions_instances = label_spread.predict(X_test[i]) 
+        if 1 in predictions_instances:
+            Predictions= np.append(Predictions,np.array([[1]]), axis = 0)
+        else : 
+            Predictions= np.append(Predictions,np.array([[0]]), axis = 0)
+    #Metrics
+    metrics = evaluationEnsemble(truelab=Y_test,outlab=Predictions)
     AUC.append(metrics[9])
     F.append(metrics[7])
     results.append(metrics)
     fold +=1
     
 target = open('Results.txt', 'a')
-target.write('Results '+InstanceType+' kernel:'+kernel+"\n"+'Class'+str(ClassNumber)+"\n"+'F= '+str(np.mean(F))+"\n"+ 'AUC ='+str(np.mean(AUC))+"\n")
+target.write('Results '+paradigm+' kernel:'+kernel+"\n"+'Class'+str(ClassNumber)+"\n"+'F= '+str(np.mean(F))+"\n"+ 'AUC ='+str(np.mean(AUC))+"\n")
 target.close()
 
                                         #------#
                                         #-SIML-#
                                         #------#
 #Multilabel {oneVSRest}
-LabelType = 'ALL'
-InstanceType = 'SIML'
-defect = 'AB'
+LabelType = 'ML'
+paradigm = 'SIML'
 
-X_siml,Y_siml = LoadDataEvaluation(LabelType,defect,ClassNumber,InstanceType)
+#Load Data
+X_siml,Y_siml,instance_label_bags_ML = LoadDataEvaluation(ClassNumber,LabelType)
 
 #remove rows with nan columns 
-nanrows = np.unique(np.where(np.isnan(X_siml))[0])
-X_siml = np.delete(X_siml, nanrows, 0)
-Y_siml = np.delete(Y_siml, nanrows, 0)
+X_siml,instance_label_bags_ML = RemodeNanInstances(X_siml,instance_label_bags_ML) 
 
 #Normalize 
-X_siml = normalize(X_siml,norm = 'l2',axis=0)
+X_siml = [normalize(bag,norm = 'l2',axis=0) for bag in X_siml]
 
-#Shuffle Data 
-X_siml, Y_siml = shuffle(X_siml, Y_siml, random_state=0)
+labelsAB = np.logical_or(Y_siml[:,[0]],Y_siml[:,[1]])
+labelsAB = labelsAB.astype(int)
 
-labelsAB = Y_siml[:,[0]] * Y_siml[:,[1]]
 skf = StratifiedKFold(labelsAB.reshape(len(labelsAB)), n_folds=folds)
 results = [] 
 AUC = []   
@@ -107,33 +112,55 @@ fold = 1
 kernel='linear'
 #kernel = 'rbf'
 classif = OneVsRestClassifier(SVC(kernel=kernel))
+Predictions = np.empty((0,1), int)
 
 for train_index, test_index in skf:
-    X_train = X_siml[train_index]
+    X_train = [X_siml[i] for i in train_index]
     Y_train = Y_siml[train_index]
-    X_test  = X_siml[test_index]
+    instance_label_bags_ML_Train = [instance_label_bags_ML[i] for i in train_index]    
+    X_test  = [X_siml[i] for i in test_index]
     Y_test  = Y_siml[test_index]
+    instance_label_bags_ML_Test = [instance_label_bags_ML[i] for i in test_index] 
     sys.stdout.write('Fold# '+str(fold)+'...')
-    classif.fit(X_train, Y_train)
-    predictions = classif.predict(X_test)
-    predictions2sl = predictions[:,[0]] * predictions[:,[1]]
-    Ytest2sl = Y_test[:,[0]] * Y_test[:,[1]]
-    metrics = evaluationEnsemble(truelab=Ytest2sl,outlab=predictions2sl)
+    
+    #Bags to SI
+    X_train_all = np.vstack((X_train))
+    instance_label_bags_ML_Train_ALL = np.vstack((instance_label_bags_ML_Train))
+    
+    #Fit Model
+    classif.fit(X_train_all, instance_label_bags_ML_Train_ALL)
+    
+    #Test 
+    for i in range(len(X_test)):
+        predictions_instances = classif.predict(X_test[i]) 
+        predictions_instances2SL = np.logical_or(predictions_instances[:,[0]],predictions_instances[:,[1]])
+        predictions_instances2SL = predictions_instances2SL.astype(int)
+        if 1 in predictions_instances2SL:
+            Predictions= np.append(Predictions,np.array([[1]]), axis = 0)
+        else : 
+            Predictions= np.append(Predictions,np.array([[0]]), axis = 0)
+    Ytest2sl = np.logical_or(Y_test[:,[0]],Y_test[:,[1]])
+    Ytest2sl = Ytest2sl.astype(int)
+    metrics = evaluationEnsemble(truelab=Ytest2sl,outlab=Predictions)
     AUC.append(metrics[9])
     F.append(metrics[7])
     results.append(metrics)
     fold +=1
     
 target = open('Results.txt', 'a')
-target.write('Results '+InstanceType+' kernel:'+kernel+"\n"+'Class'+str(ClassNumber)+"\n"+'F= '+str(np.mean(F))+"\n"+ 'AUC ='+str(np.mean(AUC))+"\n")
+target.write('Results '+paradigm+' kernel:'+kernel+"\n"+'Class'+str(ClassNumber)+"\n"+'F= '+str(np.mean(F))+"\n"+ 'AUC ='+str(np.mean(AUC))+"\n")
 target.close()
 
     
+
+'''
+Estos Multi Instance puede que se hallan Dañado por el 
+valor adicional que la funcion tiene [Arreglarlo].
+'''
                                         #------#
                                         #-MISL-#
                                         #------#
 import sys,os
-os.chdir('/Users/josemiguelarrieta/Documents/MILpy')
 sys.path.append(os.path.realpath('..'))
 from MILpy.Algorithms.simpleMIL import simpleMIL
 from MILpy.Algorithms.CKNN import CKNN
@@ -141,20 +168,16 @@ from MILpy.Algorithms.EMDD import EMDD
 from MILpy.Algorithms.BOW import BOW
 seed = 66
 
-LabelType = 'ALL'
-InstanceType = 'MISL'
-defect = 'AB'
+LabelType = 'SL'
+paradigm = 'MISL'
 
-X_misl,Y_misl = LoadDataEvaluation(LabelType,defect,ClassNumber,InstanceType)
+X_misl,Y_misl,instance_label_bags_ML = LoadDataEvaluation(ClassNumber,LabelType)
 
 #remove rows with nan columns
-X_misl = RemodeNanInstances(X_misl)
+X_misl,instance_label_bags_ML = RemodeNanInstances(X_misl,instance_label_bags_ML)
 
 #Normalize Bags
 X_misl = [normalize(bag,norm = 'l2',axis=0) for bag in X_misl]
-
-#Shuffle Data
-X_misl, Y_misl = shuffle(X_misl, Y_misl, random_state=0)
 
 skf = StratifiedKFold(Y_misl.reshape(len(Y_misl)), n_folds=folds)
 fold = 1
@@ -167,9 +190,11 @@ SMILa = simpleMIL()
 #SMILa = BOW()
 #SMILa = EMDD() 
 
-
-#NOTE: SimpleMIL devuelve 1 valor, los demas devuelven 2 (Modificar Acorde).
-
+'''
+NOTE: SimpleMIL devuelve 1 valor
+los demas devuelven 2 
+(Modificar Acorde).
+'''
 for train_index, test_index in skf:
     X_train = [X_misl[i] for i in train_index]
     Y_train = Y_misl[train_index]
@@ -189,9 +214,14 @@ for train_index, test_index in skf:
 
 os.chdir('../../Documents/SIVA')
 target = open('Results.txt', 'a')
-target.write('Results '+InstanceType+"\n"+'Class'+str(ClassNumber)+' Algo:'+str(SMILa)+"\n"+'F= '+str(np.mean(F))+"\n"+ 'AUC ='+str(np.mean(AUC))+"\n")
+target.write('Results '+paradigm+"\n"+'Class'+str(ClassNumber)+' Algo:'+str(SMILa)+"\n"+'F= '+str(np.mean(F))+"\n"+ 'AUC ='+str(np.mean(AUC))+"\n")
 target.close()
 
+
+'''
+Estos Multi Instance puede que se hallan Dañado por el 
+valor adicional que la funcion tiene [Arreglarlo].
+'''
                                         #------#
                                         #-MIML-#
                                         #------#
@@ -200,23 +230,22 @@ target.close()
 MIML is done in MATLAB. 
 Here Data Transformation is done to export to Matlab format. 
 """
-LabelType = 'ALL'
-InstanceType = 'MIML'
+LabelType = 'ML'
+paradigm = 'MIML'
 defect = 'AB'
-import scipy.io as sio
 
-X_miml,Y_miml = LoadDataEvaluation(LabelType,defect,ClassNumber,InstanceType)
+import scipy.io as sio
+X_miml,Y_miml,instance_label_bags_ML = LoadDataEvaluation(ClassNumber,LabelType)
 
 #remove rows with nan columns 
-X_miml = RemodeNanInstances(X_miml)
+X_miml,instance_label_bags_ML = RemodeNanInstances(X_miml,instance_label_bags_ML) 
 
 #Normalize Bags
 X_miml = [normalize(bag,norm = 'l2',axis=0) for bag in X_miml]
 
-#Shuffle Data 
-X_miml, Y_miml = shuffle(X_miml, Y_miml, random_state=0)
 
-labelsAB = Y_miml[:,[0]] * Y_miml[:,[1]]
+labelsAB = np.logical_or(Y_miml[:,[0]],Y_miml[:,[1]])
+labelsAB = labelsAB.astype(int)
 
 skf = StratifiedKFold(labelsAB.reshape(len(labelsAB)), n_folds=folds,shuffle=True)
 prueba = []
@@ -229,7 +258,7 @@ for train_index, test_index in skf:
     X_test  = [X_miml[i] for i in test_index]
     Y_test  = Y_miml[test_index]
     sys.stdout.write('Fold# '+str(fold)+'...')
-    sio.savemat('ExperimentsData/folds_miml2/MIML'+'_'+str(ClassNumber)+'fold_'+str(fold)+'.mat', {'X_train':X_train,'Y_train':Y_train,'X_test':X_test,'Y_test':Y_test,'fold':fold,'Class_number':ClassNumber})
+    sio.savemat('ExperimentsData2/folds_miml/class'+str(ClassNumber)+'/class'+str(ClassNumber)+'_'+str(fold)+'.mat', {'X_train':X_train,'Y_train':Y_train,'X_test':X_test,'Y_test':Y_test,'fold':fold,'Class_number':ClassNumber})
     target = open('Results.txt', 'a')
     target.write('MIML'+'_'+str(ClassNumber)+'fold_'+str(fold)+'.mat'+' CREATED'+"\n")
     target.close()

@@ -12,44 +12,29 @@ os.chdir('Documents/SIVA')
 import pickle
 
 ClassNumber = 1  #Pass argument!. 
-defects =['AB','NO']
 
-#Load Data
-InstanceType = 'SISL'
-path_data = '/Users/josemiguelarrieta/Documents/SIVA/ExperimentsData2/defectAB/'+'class'+str(ClassNumber)+'/'+InstanceType+'/'
-f = open(path_data+'X_sisl.pckl', 'rb') 
-X_sisl = pickle.load(f)
+#Load Data SIngle Label 
+LabelType = 'SL'  
+path_data = '/Users/josemiguelarrieta/Documents/SIVA/ExperimentsData2/defectAB/'+'class'+str(ClassNumber)+'/'+LabelType+'/'
+f = open(path_data+'BagsSL.pckl', 'rb') 
+BagsSL = pickle.load(f)
 f.close()
-f = open(path_data+'Y_sisl.pckl', 'rb') 
-Y_sisl = pickle.load(f)
+f = open(path_data+'BagLabelsSL.pckl', 'rb') 
+BagLabelsSL = pickle.load(f)
 f.close()
-
-#Load Data
-InstanceType = 'MISL'
-path_data = '/Users/josemiguelarrieta/Documents/SIVA/ExperimentsData2/defectAB/'+'class'+str(ClassNumber)+'/'+InstanceType+'/'
-f = open(path_data+'Bags_misl.pckl', 'rb') 
-X_misl = pickle.load(f)
-f.close()
-f = open(path_data+'Y_misl.pckl', 'rb') 
-Y_misl = pickle.load(f)
+f = open(path_data+'InstanceBagLabelSL.pckl', 'rb') 
+InstanceBagLabelSL = pickle.load(f)
 f.close()
 
-#Load Data
-InstanceType = 'SIML'
-path_data = '/Users/josemiguelarrieta/Documents/SIVA/ExperimentsData2/defectAB/'+'class'+str(ClassNumber)+'/'+InstanceType+'/'
-f = open(path_data+'X_siml.pckl', 'rb') 
-X_siml = pickle.load(f)
+#Load Data Multi Label
+LabelType = 'ML'
+path_data = '/Users/josemiguelarrieta/Documents/SIVA/ExperimentsData2/defectAB/'+'class'+str(ClassNumber)+'/'+LabelType+'/'
+f = open(path_data+'BagsML.pckl', 'rb') 
+BagsML = pickle.load(f)
 f.close()
-f = open(path_data+'Y_siml.pckl', 'rb') 
-Y_siml = pickle.load(f)
+f = open(path_data+'BagLabelsML.pckl', 'rb') 
+BagLabelsML = pickle.load(f)
 f.close()
-
-#Load Data
-InstanceType = 'MIML'
-path_data = '/Users/josemiguelarrieta/Documents/SIVA/ExperimentsData2/defectAB/'+'class'+str(ClassNumber)+'/'+InstanceType+'/'
-f = open(path_data+'Bags_miml.pckl', 'rb') 
-Bags_miml = pickle.load(f)
-f.close()
-f = open(path_data+'Y_miml.pckl', 'rb') 
-Y_miml = pickle.load(f)
+f = open(path_data+'InstanceBagLabelML.pckl', 'rb') 
+InstanceBagLabelML = pickle.load(f)
 f.close()

@@ -93,22 +93,22 @@ def get_data_MISL(cropped,cropped_maskA = None,cropped_maskB = None):
     
     """
     if cropped_maskA is not None and cropped_maskB is not None: #Two Defect
-        labels,bag = get_data_SISL(cropped,cropped_maskA,cropped_maskB)
-        if 1 in labels:
+        instance_labels,bag = get_data_SISL(cropped,cropped_maskA,cropped_maskB)
+        if 1 in instance_labels:
             label_bag = 1
         else:
             label_bag = 0
-        return label_bag, bag
+        return label_bag, bag, instance_labels
     elif cropped_maskA is not None:   #One Defect
-        labels,bag = get_data_SISL(cropped,cropped_maskA)
-        if 1 in labels:
+        instance_labels,bag = get_data_SISL(cropped,cropped_maskA)
+        if 1 in instance_labels:
             label_bag = 1
         else:
             label_bag = 0
-        return label_bag, bag
+        return label_bag, bag, instance_labels 
     elif cropped_maskA is None and cropped_maskB is None:  #No Defect
-        labels,bag = get_data_SISL(cropped)
-        return 0, bag
+        instance_labels,bag = get_data_SISL(cropped)
+        return 0, bag, instance_labels
 
 def get_data_SIML(cropped,cropped_maskA,cropped_maskB):
     """
@@ -171,20 +171,22 @@ def get_data_MIML(cropped,cropped_maskA,cropped_maskB):
     Output:
     
     """
-    insta_labels, instances = get_data_SIML(cropped,cropped_maskA,cropped_maskB)
-    insta_labelsA = insta_labels[:,[0]]
-    insta_labelsB = insta_labels[:,[1]]
+    instance_labels, instances = get_data_SIML(cropped,cropped_maskA,cropped_maskB)
+    instance_labelsA = instance_labels[:,[0]]
+    instance_labelsB = instance_labels[:,[1]]
     bag = instances
-    if 1 in insta_labelsA:
+    if 1 in instance_labelsA:
         labelA = 1
     else:
         labelA = 0
-    if 1 in insta_labelsB:
+    if 1 in instance_labelsB:
         labelB = 1
     else:
         labelB = 0
     label_bag = np.array([[labelA,labelB]])
-    return label_bag, bag
+    return label_bag, bag, instance_labels
+
+
         
 
 def sliding_window(image, image2 ,stepSize, windowSize):
