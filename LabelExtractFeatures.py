@@ -32,11 +32,11 @@ def get_data_SISL(cropped,cropped_maskA=None,cropped_maskB=None):
     insta_labelsA = np.empty((0,1), int)
     insta_labelsB = np.empty((0,1), int)
             
-    #Check If image contains Defect 2
+    #Check If image Contains Defect 2
     if cropped_maskB is None:
         cropped_maskB = np.zeros(cropped.shape[:2], dtype = "uint8")
        
-    #Check If image contains Defect 1
+    #Check If image Contains Defect 1
     if cropped_maskA is None:
         cropped_maskA = np.zeros(cropped.shape[:2], dtype = "uint8")
             

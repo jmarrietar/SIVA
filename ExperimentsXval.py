@@ -18,17 +18,20 @@ import sys
 
 #General Information 
 path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'
-ClassNumber = 2
-folds = 10
-                                        #------#
-                                        #-SISL-#
-                                        #------#
+ClassNumber = 1
+folds = 5
+                                        ###########
+                                        #   SISL  #
+                                        ###########
                                     
                                         
 #Load data
 LabelType = 'SL'
 paradigm = 'SISL'
 X_sisl,Y_sisl,instance_label_bags_SL = LoadDataEvaluation(ClassNumber,LabelType)
+
+#Suffle
+X_sisl, instance_label_bags_SL, Y_sisl = shuffle(X_sisl, instance_label_bags_SL, Y_sisl, random_state=0)
 
 #remove rows with nan columns
 X_sisl,instance_label_bags_SL = RemodeNanInstances(X_sisl,instance_label_bags_SL) 
@@ -40,7 +43,9 @@ X_sisl = [normalize(bag,norm = 'l2',axis=0) for bag in X_sisl]
 kernel = 'rbf'
 label_spread = label_propagation.LabelSpreading(kernel=kernel, alpha=1.0)
 
-skf = StratifiedKFold(Y_sisl.reshape(len(Y_sisl)), n_folds=folds)
+
+skf = StratifiedKFold(Y_sisl.reshape(len(Y_sisl)), n_folds=folds, shuffle=True)
+
 results = [] 
 AUC = []
 F = []
@@ -85,15 +90,18 @@ target = open('Results.txt', 'a')
 target.write('Results '+paradigm+' kernel:'+kernel+"\n"+'Class'+str(ClassNumber)+"\n"+'F= '+str(np.mean(F))+"\n"+ 'AUC ='+str(np.mean(AUC))+"\n")
 target.close()
 
-                                        #------#
-                                        #-SIML-#
-                                        #------#
+                                        ###########
+                                        #   SIML  #
+                                        ###########
 #Multilabel {oneVSRest}
 LabelType = 'ML'
 paradigm = 'SIML'
 
 #Load Data
 X_siml,Y_siml,instance_label_bags_ML = LoadDataEvaluation(ClassNumber,LabelType)
+
+#Suffle
+X_siml, instance_label_bags_ML, Y_siml = shuffle(X_siml, instance_label_bags_ML, Y_siml, random_state=0)
 
 #remove rows with nan columns 
 X_siml,instance_label_bags_ML = RemodeNanInstances(X_siml,instance_label_bags_ML) 
@@ -157,9 +165,9 @@ target.close()
 Estos Multi Instance puede que se hallan Dañado por el 
 valor adicional que la funcion tiene [Arreglarlo].
 '''
-                                        #------#
-                                        #-MISL-#
-                                        #------#
+                                        ############
+                                        #   MISL   #
+                                        ############
 import sys,os
 sys.path.append(os.path.realpath('..'))
 from MILpy.Algorithms.simpleMIL import simpleMIL
@@ -171,7 +179,11 @@ seed = 66
 LabelType = 'SL'
 paradigm = 'MISL'
 
+#Load Data
 X_misl,Y_misl,instance_label_bags_ML = LoadDataEvaluation(ClassNumber,LabelType)
+
+#Suffle
+X_misl, instance_label_bags_ML, Y_misl = shuffle(X_misl, instance_label_bags_ML, Y_misl, random_state=0)
 
 #remove rows with nan columns
 X_misl,instance_label_bags_ML = RemodeNanInstances(X_misl,instance_label_bags_ML)
@@ -218,13 +230,9 @@ target.write('Results '+paradigm+"\n"+'Class'+str(ClassNumber)+' Algo:'+str(SMIL
 target.close()
 
 
-'''
-Estos Multi Instance puede que se hallan Dañado por el 
-valor adicional que la funcion tiene [Arreglarlo].
-'''
-                                        #------#
-                                        #-MIML-#
-                                        #------#
+                                        ###########
+                                        #   MIML  #
+                                        ###########
 
 """
 MIML is done in MATLAB. 
@@ -235,14 +243,18 @@ paradigm = 'MIML'
 defect = 'AB'
 
 import scipy.io as sio
+
+#Load data
 X_miml,Y_miml,instance_label_bags_ML = LoadDataEvaluation(ClassNumber,LabelType)
+
+#Suffle
+X_miml, instance_label_bags_ML, Y_miml = shuffle(X_miml, instance_label_bags_ML, Y_miml, random_state=0)
 
 #remove rows with nan columns 
 X_miml,instance_label_bags_ML = RemodeNanInstances(X_miml,instance_label_bags_ML) 
 
 #Normalize Bags
 X_miml = [normalize(bag,norm = 'l2',axis=0) for bag in X_miml]
-
 
 labelsAB = np.logical_or(Y_miml[:,[0]],Y_miml[:,[1]])
 labelsAB = labelsAB.astype(int)

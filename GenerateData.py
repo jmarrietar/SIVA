@@ -39,7 +39,7 @@ for defect in defects:
             cropped,cropped_maskA,cropped_maskB = WeakLabeling(path,num,ClassNumber,defect = defect,exp = True)
             baglabel, bag, instanceLabels = get_data_MISL(cropped,cropped_maskA,cropped_maskB)
         elif defect == 'NO':
-            image = load_image_dagm(path,num,ClassNumber,defect = defect,exp = True)
+            image = load_image_dagm(path,num,ClassNumber,defect = defect,exp = True)            
             baglabel, bag, instanceLabels = get_data_MISL(image)
         else:
             cropped,cropped_mask = WeakLabeling(path,num,ClassNumber,defect = defect,exp = True)
