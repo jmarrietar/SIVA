@@ -3,6 +3,7 @@
 Cross Validation for differents Algorithms paradigms. 
 
 @author: josemiguelarrieta
+
 """
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.multiclass import OneVsRestClassifier
@@ -18,8 +19,8 @@ import sys
 
 #General Information 
 path = '/Users/josemiguelarrieta/Dropbox/11_Semestre/Jovenes_Investigadores/images/Experiment_1_DAGM/Class'
-ClassNumber = 1
-folds = 5
+ClassNumber = 5
+folds = 10
                                         ###########
                                         #   SISL  #
                                         ###########
@@ -39,8 +40,8 @@ X_sisl,instance_label_bags_SL = RemodeNanInstances(X_sisl,instance_label_bags_SL
 #Normalize Bags
 X_sisl = [normalize(bag,norm = 'l2',axis=0) for bag in X_sisl]
 
-#kernel='knn'
-kernel = 'rbf'
+kernel='knn'
+#kernel = 'rbf'
 label_spread = label_propagation.LabelSpreading(kernel=kernel, alpha=1.0)
 
 
@@ -112,13 +113,14 @@ X_siml = [normalize(bag,norm = 'l2',axis=0) for bag in X_siml]
 labelsAB = np.logical_or(Y_siml[:,[0]],Y_siml[:,[1]])
 labelsAB = labelsAB.astype(int)
 
-skf = StratifiedKFold(labelsAB.reshape(len(labelsAB)), n_folds=folds)
+skf = StratifiedKFold(labelsAB.reshape(len(labelsAB)), n_folds=folds, shuffle=True)
+
 results = [] 
 AUC = []   
 F = []
 fold = 1
-kernel='linear'
-#kernel = 'rbf'
+#kernel='linear'
+kernel = 'rbf'
 classif = OneVsRestClassifier(SVC(kernel=kernel))
 Predictions = np.empty((0,1), int)
 
@@ -191,7 +193,7 @@ X_misl,instance_label_bags_ML = RemodeNanInstances(X_misl,instance_label_bags_ML
 #Normalize Bags
 X_misl = [normalize(bag,norm = 'l2',axis=0) for bag in X_misl]
 
-skf = StratifiedKFold(Y_misl.reshape(len(Y_misl)), n_folds=folds)
+skf = StratifiedKFold(Y_misl.reshape(len(Y_misl)), n_folds=folds, shuffle=True)
 fold = 1
 results = [] 
 AUC = []
@@ -213,12 +215,15 @@ for train_index, test_index in skf:
     X_test  = [X_misl[i] for i in test_index]
     Y_test  = Y_misl[test_index]
     sys.stdout.write('Fold# '+str(fold)+'...')
-    SMILa.fit(X_train, Y_train, type='average') #SimpleMIL
+    SMILa.fit(X_train, Y_train, type='min') #SimpleMIL {'average','extreme','max', 'min'}
     #SMILa.fit(X_train, Y_train) #EMDD 
     #SMILa.fit(X_train, Y_train,references = 3, citers = 5) #CNN
-    #SMILa.fit(X_train, Y_train,k=10,covar_type = 'diag',n_iter = 20)#BOW
+    #SMILa.fit(X_train, Y_train, k=10, covar_type = 'diag')#BOW
     predictions = SMILa.predict(X_test)
-    metrics = evaluationEnsemble(truelab=Y_test,outlab=predictions)
+    if type(predictions) is tuple:
+        metrics = evaluationEnsemble(truelab=Y_test,outlab=predictions[0])
+    else:
+        metrics = evaluationEnsemble(truelab=Y_test,outlab=predictions)
     AUC.append(metrics[9])
     F.append(metrics[7])
     results.append(metrics)
