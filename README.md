@@ -44,6 +44,24 @@ For generation of instances in the weak learning paradigms, simple instances as 
 
 Original Images at https://hci.iwr.uni-heidelberg.de/node/3616
 
+Results (AUCx100)
+--------
+| Algorithm        | Class 1           | Class 2   | Class 3   | Class 4   | Class 5   | 
+| ------------- |:-------------:| -----:| -----:| -----:| -----:|
+| Label propagation (kernel: knn, 30%) [SISL]      | 50,94 | 50,00 |50,00 |54,06 |51,06 |
+| Label propagation (kernel: rbf, 30%) [SISL]     | 53,56      |   57,22 |  54,56 |   55,00 |  50,56 |
+| OneVsRestClassifier (kernel: rbf) [SIML] |   57,44 |    50,00 |   46,89 |   53,44 |    47,56 |
+| OneVsRestClassifier (kernel: linear) [SIML] | 55,11      |    53,78 |    61,11 |   55,44 |    52,56 |
+| SimpleMIL (min) [MISL] |    83,94 |    66,72 |   81,89 |   63,56 |    71,33 |
+| SimpleMIL (average) [MISL] | 86,89  |  96,83 |    97,00 |   96,50 |    97,44 |
+| SimpleMIL (max) [MISL] | 99,50     |    100,00 |    100,00 |   100,00 |    100,00 |
+| SimpleMIL (extreme) [MISL] | 99,50      |    99,50 |    100,00 |   100,00 |    100,00 |
+| BOW [MISL] | 100,00      |    100,00 |    100,00 |   100,00 |    100,00 |
+| EMDD [MISL] | 70,50  |  61,50 |  59,50 |  62,23 | 61,00 |
+| MIMLBOOST [MIML] | 74,00      |    74,00 |    74,00 |   74,00 |    74,00 |
+| MIMLSVM [MIML] | 74,00  | 74,00 | 74,00 | 74,00 | 74,00|
+
+
 Conclusions
 -----------
 In this paper, a literature review of the weak learning paradigms grouped according to the representation of the object of interest and its class label was carried out. This theoretical revision was complemented by a practical application in the context of automatic visual inspection, where different kinds of textures were chosen and defects identified using different paradigms of weak learning.
