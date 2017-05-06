@@ -19,7 +19,7 @@ Weak learning and object-label relationship
 --------------------------------------------
 
 <div align="center">
-<img src="https://github.com/jmarrietar/SIVA/blob/organize/img/Slide1.jpg" width="50%" height="50%"/>
+<img src="https://github.com/jmarrietar/SIVA/blob/Master/img/Slide1.jpg" width="50%" height="50%"/>
 </div>
 <br>
 
@@ -38,7 +38,7 @@ An additional defect to the original image is necessary in order to use learning
 For generation of instances in the weak learning paradigms, simple instances as in multiple instances, we used a strategy based on weak labeling (Weak labeling). Here, the expert defines a region enclosing the defect of the image and neighboring regions. A block size of 32px x 32px is slid through the area defined by the expert and extracts the characteristics in each block of the region enclosing the defect. These zones were automatically defined with help of the ground truth of the images.
 
 <div align="center">
-<img src="https://github.com/jmarrietar/SIVA/blob/organize/img/collage2.jpeg" width="50%" height="50%"/>
+<img src="https://github.com/jmarrietar/SIVA/blob/Master/img/collage2.jpeg" width="50%" height="50%"/>
 </div>
 <br>
 
