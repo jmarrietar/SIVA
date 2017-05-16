@@ -5,6 +5,7 @@ Cross Validation for differents Algorithms paradigms.
 @author: josemiguelarrieta
 
 """
+import os
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
@@ -40,8 +41,8 @@ X_sisl,instance_label_bags_SL = RemodeNanInstances(X_sisl,instance_label_bags_SL
 #Normalize Bags
 X_sisl = [normalize(bag,norm = 'l2',axis=0) for bag in X_sisl]
 
-kernel='knn'
-#kernel = 'rbf'
+#kernel='knn'
+kernel = 'rbf'
 label_spread = label_propagation.LabelSpreading(kernel=kernel, alpha=1.0)
 
 
@@ -88,7 +89,7 @@ for train_index, test_index in skf:
     fold +=1
     
 target = open('Results.txt', 'a')
-target.write('Results '+paradigm+' kernel:'+kernel+"\n"+'Class'+str(ClassNumber)+"\n"+'F= '+str(np.mean(F))+"\n"+ 'AUC ='+str(np.mean(AUC))+"\n")
+target.write('Results '+paradigm+' kernel:'+kernel+"\n"+'Class'+str(ClassNumber)+"\n"+'F= '+str(np.mean(F))+"\n"+'F = '+str(F)+"\n"+'AUC ='+str(np.mean(AUC))+"\n"+'AUC ='+str(AUC)+"\n")
 target.close()
 
                                         ###########
@@ -158,7 +159,7 @@ for train_index, test_index in skf:
     fold +=1
     
 target = open('Results.txt', 'a')
-target.write('Results '+paradigm+' kernel:'+kernel+"\n"+'Class'+str(ClassNumber)+"\n"+'F= '+str(np.mean(F))+"\n"+ 'AUC ='+str(np.mean(AUC))+"\n")
+target.write('Results '+paradigm+' kernel:'+kernel+"\n"+'Class'+str(ClassNumber)+"\n"+'F= '+str(np.mean(F))+"\n"+'F = '+str(F)+"\n"+'AUC ='+str(np.mean(AUC))+"\n"+'AUC = '+str(AUC)+"\n")
 target.close()
 
     
@@ -209,13 +210,14 @@ NOTE: SimpleMIL devuelve 1 valor
 los demas devuelven 2 
 (Modificar Acorde).
 '''
+
 for train_index, test_index in skf:
     X_train = [X_misl[i] for i in train_index]
     Y_train = Y_misl[train_index]
     X_test  = [X_misl[i] for i in test_index]
     Y_test  = Y_misl[test_index]
     sys.stdout.write('Fold# '+str(fold)+'...')
-    SMILa.fit(X_train, Y_train, type='min') #SimpleMIL {'average','extreme','max', 'min'}
+    SMILa.fit(X_train, Y_train, type='max') #SimpleMIL { 'min','average','extreme','max'}
     #SMILa.fit(X_train, Y_train) #EMDD 
     #SMILa.fit(X_train, Y_train,references = 3, citers = 5) #CNN
     #SMILa.fit(X_train, Y_train, k=10, covar_type = 'diag')#BOW
@@ -231,7 +233,7 @@ for train_index, test_index in skf:
 
 os.chdir('../../Documents/SIVA')
 target = open('Results.txt', 'a')
-target.write('Results '+paradigm+"\n"+'Class'+str(ClassNumber)+' Algo:'+str(SMILa)+"\n"+'F= '+str(np.mean(F))+"\n"+ 'AUC ='+str(np.mean(AUC))+"\n")
+target.write('Results '+paradigm+"\n"+'Class'+str(ClassNumber)+' Algo:'+str(SMILa)+"\n"+'F mean= '+str(np.mean(F))+"\n"+'F = '+str(F)+"\n"+ 'AUC mean ='+str(np.mean(AUC))+"\n"+'AUC = '+str(AUC)+"\n")
 target.close()
 
 
